@@ -534,7 +534,7 @@ async function api({sys,msgs,tok,onT,onD,onE}){
         'anthropic-version':'2023-06-01',
         'anthropic-dangerous-direct-browser-access':'true'
       },
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:tok||1200,stream:true,system:sys,messages:msgs})
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:tok||1200,stream:true,system:sys,messages:msgs})
     });
     if(!r.ok){const e=await r.json().catch(()=>({}));onE(e.error?.message||`HTTP ${r.status}`);return;}
     const rd=r.body.getReader();const dc=new TextDecoder();let buf='';
