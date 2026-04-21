@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2MR Labs — Content Calendar</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --m: #A32D2D; --mb: #FCEBEB; --mbd: #F09595; --mt: #501313;
+    --bg: #ffffff; --bg2: #f7f6f3; --bg3: #f0eeea;
+    --tx: #1a1a18; --tx2: #5f5e5a; --tx3: #9a9893;
+    --bd: rgba(0,0,0,0.12); --bd2: rgba(0,0,0,0.22);
+    --r: 8px; --rl: 12px;
+    --c-sig: #185FA5; --c-sig-bg: #E6F1FB; --c-sig-bd: #85B7EB; --c-sig-t: #042C53;
+    --c-alt: #854F0B; --c-alt-bg: #FAEEDA; --c-alt-bd: #EF9F27; --c-alt-t: #412402;
+    --c-lf: #534AB7; --c-lf-bg: #EEEDFE; --c-lf-bd: #AFA9EC; --c-lf-t: #26215C;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --m: #E24B4A; --mb: #501313; --mbd: #A32D2D; --mt: #F7C1C1;
+      --bg: #1c1c1a; --bg2: #242422; --bg3: #2c2c2a;
+      --tx: #f0eeea; --tx2: #b4b2a9; --tx3: #666460;
+      --bd: rgba(255,255,255,0.1); --bd2: rgba(255,255,255,0.2);
+      --c-sig: #378ADD; --c-sig-bg: #042C53; --c-sig-bd: #185FA5; --c-sig-t: #B5D4F4;
+      --c-alt: #BA7517; --c-alt-bg: #412402; --c-alt-bd: #854F0B; --c-alt-t: #FAC775;
+      --c-lf: #7F77DD; --c-lf-bg: #26215C; --c-lf-bd: #534AB7; --c-lf-t: #CECBF6;
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--tx); min-height: 100vh; }
+  #shell { max-width: 800px; margin: 0 auto; padding: 24px 16px 80px; }
+  .brand { display: flex; align-items: baseline; gap: 10px; padding-bottom: 14px; border-bottom: 0.5px solid var(--bd); margin-bottom: 18px; }
+  .bn { font-size: 17px; font-weight: 500; color: var(--m); }
+  .bt { font-size: 12px; color: var(--tx3); }
+  .tabs { display: flex; border-bottom: 0.5px solid var(--bd); margin-bottom: 20px; }
+  .tab { padding: 8px 16px; font-size: 13px; color: var(--tx2); background: transparent; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: inherit; margin-bottom: -0.5px; transition: color .12s, border-color .12s; white-space: nowrap; }
+  .tab:hover { color: var(--tx); }
+  .tab.on { color: var(--m); border-bottom-color: var(--m); font-weight: 500; }
+  .sec { display: none; }
+  .sec.on { display: block; }
+  .card { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); padding: 16px 18px; margin-bottom: 12px; }
+  label { font-size: 12px; color: var(--tx2); display: block; margin-bottom: 6px; }
+  .fg { margin-bottom: 14px; }
+  input[type=text], textarea, select { width: 100%; padding: 8px 10px; font-size: 13px; font-family: inherit; background: var(--bg2); border: 0.5px solid var(--bd); border-radius: var(--r); color: var(--tx); outline: none; transition: border-color .12s; }
+  input[type=text]:focus, textarea:focus { border-color: var(--bd2); }
+  textarea { min-height: 68px; resize: vertical; line-height: 1.6; }
+  .tg { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ch { padding: 5px 12px; font-size: 12px; cursor: pointer; border: 0.5px solid var(--bd2); border-radius: var(--r); background: transparent; color: var(--tx2); font-family: inherit; transition: all .1s; white-space: nowrap; }
+  .ch:hover { color: var(--tx); }
+  .ch.on { background: var(--mb); color: var(--mt); border-color: var(--mbd); font-weight: 500; }
+  .btn-p { padding: 8px 20px; font-size: 13px; font-weight: 500; background: var(--m); color: #fff; border: none; border-radius: var(--r); cursor: pointer; font-family: inherit; transition: opacity .12s; white-space: nowrap; }
+  .btn-p:hover { opacity: .85; }
+  .btn-p:disabled { opacity: .38; cursor: not-allowed; }
+  .btn-g { padding: 6px 12px; font-size: 12px; background: transparent; border: 0.5px solid var(--bd2); border-radius: var(--r); color: var(--tx2); cursor: pointer; font-family: inherit; transition: all .12s; white-space: nowrap; }
+  .btn-g:hover { color: var(--tx); }
+  .nav-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .nav-info { display: flex; flex-direction: column; gap: 2px; }
+  .nav-lbl { font-size: 14px; font-weight: 500; }
+  .nav-sub { font-size: 11px; color: var(--tx3); }
+  .nav-btns { display: flex; gap: 6px; }
+  .leg { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+  .leg-i { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--tx2); }
+  .leg-d { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .wk { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); overflow: hidden; margin-bottom: 10px; }
+  .wk-hd { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 0.5px solid var(--bd); background: var(--bg2); }
+  .wk-lbl { font-size: 12px; font-weight: 500; }
+  .wk-dt { font-size: 11px; color: var(--tx3); }
+  .day-row { display: grid; grid-template-columns: 68px 1fr auto; align-items: start; border-bottom: 0.5px solid var(--bd); }
+  .day-row:last-child { border-bottom: none; }
+  .day-nm { padding: 14px 10px; font-size: 11px; font-weight: 500; color: var(--tx3); text-transform: uppercase; letter-spacing: .5px; border-right: 0.5px solid var(--bd); line-height: 1.6; }
+  .day-body { padding: 10px 14px; min-width: 0; }
+  .day-act { padding: 10px 10px; }
+  .pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: var(--r); margin-bottom: 5px; }
+  .pill-sig { background: var(--c-sig-bg); color: var(--c-sig-t); border: 0.5px solid var(--c-sig-bd); }
+  .pill-alt { background: var(--c-alt-bg); color: var(--c-alt-t); border: 0.5px solid var(--c-alt-bd); }
+  .pill-lf { background: var(--c-lf-bg); color: var(--c-lf-t); border: 0.5px solid var(--c-lf-bd); }
+  .topic-field { width: calc(100% + 8px); margin-left: -4px; font-size: 12px; font-family: inherit; background: transparent; border: 0.5px solid transparent; border-radius: var(--r); color: var(--tx2); padding: 3px 4px; line-height: 1.55; resize: none; overflow: hidden; transition: border-color .12s, background .12s; display: block; }
+  .topic-field:hover { border-color: var(--bd); background: var(--bg2); }
+  .topic-field:focus { border-color: var(--mbd); background: var(--bg2); outline: none; color: var(--tx); }
+  .edit-hint { font-size: 10px; color: var(--tx3); margin-top: 2px; }
+  .day-ch { font-size: 10px; color: var(--tx3); margin-top: 5px; }
+  .slot-panel { background: var(--bg2); border-top: 0.5px solid var(--bd); padding: 14px 16px; display: none; }
+  .slot-panel.open { display: block; }
+  .oa { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--r); padding: 14px; margin-top: 8px; }
+  .ot { font-size: 13px; line-height: 1.75; white-space: pre-wrap; color: var(--tx); word-break: break-word; }
+  .tw-l { font-size: 10px; color: var(--tx3); text-align: right; margin-top: 4px; }
+  .tw-card { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--r); padding: 12px; margin-top: 6px; }
+  .tw-num { font-size: 10px; color: var(--tx3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  .orow { display: flex; gap: 7px; margin-top: 8px; flex-wrap: wrap; }
+  .cp { padding: 4px 10px; font-size: 11px; border: 0.5px solid var(--bd2); border-radius: var(--r); background: transparent; color: var(--tx2); cursor: pointer; font-family: inherit; transition: all .1s; }
+  .cp:hover { color: var(--m); border-color: var(--mbd); }
+  .cp.ok { color: var(--m); border-color: var(--mbd); }
+  .ld { display: flex; align-items: center; gap: 8px; padding: 10px 0; font-size: 13px; color: var(--tx2); }
+  .dots span { width: 4px; height: 4px; background: var(--m); border-radius: 50%; display: inline-block; margin-right: 3px; animation: dp .9s infinite; }
+  .dots span:nth-child(2) { animation-delay: .15s; }
+  .dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes dp { 0%,100% { opacity: .15; } 50% { opacity: 1; } }
+  .art h1 { font-size: 16px; font-weight: 500; margin-bottom: 10px; color: var(--tx); }
+  .art h2 { font-size: 13px; font-weight: 500; margin: 14px 0 5px; color: var(--tx); }
+  .art p { font-size: 12px; line-height: 1.75; color: var(--tx2); margin-bottom: 8px; }
+  .art ul { padding-left: 16px; margin-bottom: 8px; }
+  .art li { font-size: 12px; line-height: 1.65; color: var(--tx2); margin-bottom: 2px; }
+  .art strong { color: var(--tx); font-weight: 500; }
+  .err { font-size: 13px; color: #E24B4A; padding: 10px 0; }
+  .cmsg { display: flex; flex-direction: column; gap: 8px; min-height: 200px; max-height: 420px; overflow-y: auto; margin-bottom: 12px; padding: 4px 0; }
+  .msg { padding: 10px 14px; font-size: 13px; line-height: 1.65; border-radius: var(--rl); max-width: 86%; }
+  .msg.u { background: var(--m); color: #fff; align-self: flex-end; }
+  .msg.a { background: var(--bg2); border: 0.5px solid var(--bd); align-self: flex-start; white-space: pre-wrap; color: var(--tx); }
+  .cir { display: flex; gap: 8px; align-items: flex-end; }
+  .cchips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+  .cchip { padding: 4px 10px; font-size: 12px; border: 0.5px solid var(--bd2); border-radius: var(--r); background: transparent; color: var(--tx2); cursor: pointer; font-family: inherit; transition: all .1s; }
+  .cchip:hover { color: var(--m); border-color: var(--mbd); }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 2px; }
+  #setup-screen { position: fixed; inset: 0; background: var(--bg3); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+  #setup-screen.hidden { display: none; }
+  .setup-card { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); padding: 32px 28px; max-width: 420px; width: 100%; }
+  .setup-logo { font-size: 17px; font-weight: 500; color: var(--m); margin-bottom: 6px; }
+  .setup-title { font-size: 15px; font-weight: 500; color: var(--tx); margin-bottom: 8px; }
+  .setup-desc { font-size: 13px; color: var(--tx2); line-height: 1.65; margin-bottom: 20px; }
+  .setup-desc a { color: var(--m); text-decoration: none; }
+  .setup-desc a:hover { text-decoration: underline; }
+  .setup-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .setup-note { font-size: 11px; color: var(--tx3); line-height: 1.5; }
+  .key-badge { display: flex; align-items: center; gap: 6px; padding: 3px 8px; font-size: 11px; color: var(--tx3); border: 0.5px solid var(--bd); border-radius: var(--r); cursor: pointer; background: transparent; font-family: inherit; transition: all .12s; margin-left: auto; }
+  .key-badge:hover { color: var(--tx); border-color: var(--bd2); }
+  .key-dot { width: 6px; height: 6px; border-radius: 50%; background: #3B6D11; flex-shrink: 0; }
+  .drop-zone { border: 1.5px dashed var(--bd2); border-radius: var(--rl); padding: 32px 24px; text-align: center; cursor: pointer; transition: all .15s; background: var(--bg); }
+  .drop-zone:hover, .drop-zone.drag { border-color: var(--m); background: var(--mb); }
+  .drop-zone input { display: none; }
+  .drop-title { font-size: 14px; font-weight: 500; color: var(--tx); margin-bottom: 5px; }
+  .drop-sub { font-size: 12px; color: var(--tx3); line-height: 1.6; }
+  .drop-link { color: var(--m); text-decoration: none; font-size: 12px; }
+  .drop-link:hover { text-decoration: underline; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .metric-card { background: var(--bg2); border-radius: var(--r); padding: 14px 16px; }
+  .metric-lbl { font-size: 11px; color: var(--tx3); margin-bottom: 5px; }
+  .metric-val { font-size: 22px; font-weight: 500; color: var(--tx); line-height: 1; }
+  .metric-sub { font-size: 11px; color: var(--tx3); margin-top: 3px; }
+  .posts-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .posts-table th { text-align: left; font-size: 10px; font-weight: 500; color: var(--tx3); text-transform: uppercase; letter-spacing: .5px; padding: 6px 10px; border-bottom: 0.5px solid var(--bd); }
+  .posts-table td { padding: 9px 10px; border-bottom: 0.5px solid var(--bd); color: var(--tx2); vertical-align: top; line-height: 1.45; }
+  .posts-table tr:last-child td { border-bottom: none; }
+  .posts-table tr:hover td { background: var(--bg2); }
+  .posts-table .post-text { color: var(--tx); max-width: 340px; }
+  .posts-table .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .eng-bar { height: 3px; background: var(--mb); border-radius: 2px; margin-top: 4px; }
+  .eng-fill { height: 3px; background: var(--m); border-radius: 2px; }
+  .ai-rec { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); padding: 18px; margin-top: 14px; }
+  .ai-rec h3 { font-size: 13px; font-weight: 500; color: var(--tx); margin-bottom: 10px; }
+  .ai-rec p { font-size: 13px; line-height: 1.7; color: var(--tx2); margin-bottom: 8px; }
+  .ai-rec ul { padding-left: 16px; margin-bottom: 8px; }
+  .ai-rec li { font-size: 13px; line-height: 1.65; color: var(--tx2); margin-bottom: 4px; }
+  .ai-rec strong { color: var(--tx); font-weight: 500; }
+  .ai-rec h4 { font-size: 12px; font-weight: 500; color: var(--tx); margin: 12px 0 5px; }
+  .period-badge { display: inline-block; font-size: 11px; color: var(--tx3); background: var(--bg2); border: 0.5px solid var(--bd); border-radius: var(--r); padding: 2px 8px; margin-bottom: 14px; }
+  .reset-btn { font-size: 11px; color: var(--tx3); background: transparent; border: none; cursor: pointer; font-family: inherit; text-decoration: underline; margin-left: 8px; }
+  .reset-btn:hover { color: var(--m); }
+</style>
+</head>
+<body>
+
+<div id="setup-screen" class="hidden">
+  <div class="setup-card">
+    <div class="setup-logo">2MR Labs</div>
+    <div class="setup-title">Enter your Anthropic API key</div>
+    <div class="setup-desc">
+      This app calls the Claude API directly from your browser. Your key is stored locally and never sent anywhere except Anthropic.<br><br>
+      Get a key at <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a>. You'll need to add a small credit balance — a month of content generation costs under $1.
+    </div>
+    <div class="setup-input-row">
+      <input type="password" id="key-input" placeholder="sk-ant-…" style="flex:1" onkeydown="if(event.key==='Enter')saveKey()">
+      <button class="btn-p" onclick="saveKey()">Save</button>
+    </div>
+    <div class="setup-note">Your key is saved in your browser's local storage. It stays on your device.</div>
+  </div>
+</div>
+
+<div id="shell">
+  <div class="brand">
+    <span class="bn">2MR Labs</span>
+    <span class="bt">Content calendar</span>
+    <button class="key-badge" onclick="promptKey()" title="Change API key"><div class="key-dot"></div>API key set</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="showTab('calendar',this)">Calendar</button>
+    <button class="tab" onclick="showTab('create',this)">Create</button>
+    <button class="tab" onclick="showTab('analytics',this)">Analytics</button>
+    <button class="tab" onclick="showTab('chat',this)">Chat</button>
+  </div>
+
+  <div id="sec-calendar" class="sec on">
+    <div class="nav-row">
+      <div class="nav-info">
+        <div class="nav-lbl" id="nav-lbl"></div>
+        <div class="nav-sub" id="nav-sub"></div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn-g" onclick="shiftWeeks(-4)">&#8592; Back</button>
+        <button class="btn-g" onclick="shiftWeeks(0)">Today</button>
+        <button class="btn-g" onclick="shiftWeeks(4)">Forward &#8594;</button>
+      </div>
+    </div>
+    <div class="leg">
+      <div class="leg-i"><div class="leg-d" style="background:var(--c-sig)"></div>Tuesday — signal post</div>
+      <div class="leg-i"><div class="leg-d" style="background:var(--c-alt)"></div>Thursday — capability / founder (alternates)</div>
+      <div class="leg-i"><div class="leg-d" style="background:var(--c-lf)"></div>Saturday — long-form</div>
+    </div>
+    <div id="cal-weeks"></div>
+  </div>
+
+  <div id="sec-create" class="sec">
+    <div class="card">
+      <div class="fg">
+        <label>Post type</label>
+        <div class="tg">
+          <button class="ch on" onclick="setV('ct','signal',this)">Signal post</button>
+          <button class="ch" onclick="setV('ct','capability',this)">Capability post</button>
+          <button class="ch" onclick="setV('ct','founder',this)">Founder voice</button>
+          <button class="ch" onclick="setV('ct','longform',this)">Long-form</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Format</label>
+        <div class="tg">
+          <button class="ch on" onclick="setV('fmt','x-post',this)">X post</button>
+          <button class="ch" onclick="setV('fmt','x-thread',this)">X thread</button>
+          <button class="ch" onclick="setV('fmt','linkedin',this)">LinkedIn</button>
+          <button class="ch" onclick="setV('fmt','medium',this)">Medium</button>
+        </div>
+      </div>
+      <div><label>Topic / angle / news hook</label>
+        <textarea id="cr-ctx" placeholder="e.g. Oman MOU announcement, drone swarms and sensor fusion, why 2MR is neutral, Lien on K2…"></textarea>
+      </div>
+    </div>
+    <button class="btn-p" id="cr-btn" onclick="genCreate()">Generate</button>
+    <div id="cr-out"></div>
+  </div>
+
+  <div id="sec-analytics" class="sec">
+    <div id="ax-upload">
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('csv-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag')"
+        ondragleave="this.classList.remove('drag')"
+        ondrop="event.preventDefault();this.classList.remove('drag');handleFile(event.dataTransfer.files[0])">
+        <input type="file" id="csv-input" accept=".csv" onchange="handleFile(this.files[0])">
+        <div class="drop-title">Drop your X analytics CSV here</div>
+        <div class="drop-sub" style="margin-top:6px">
+          Download from <a class="drop-link" href="https://analytics.twitter.com" target="_blank">analytics.twitter.com</a>
+          → Export data → By tweet → Export<br>
+          Then drop the file here or click to browse
+        </div>
+      </div>
+    </div>
+    <div id="ax-data" style="display:none">
+      <div style="display:flex;align-items:center;margin-bottom:14px">
+        <span class="period-badge" id="ax-period"></span>
+        <button class="reset-btn" onclick="resetAnalytics()">Upload new file</button>
+        <button class="btn-p btn-sm" id="ax-analyse-btn" onclick="runAnalysis()" style="margin-left:auto;padding:6px 14px;font-size:12px">Analyse &amp; recommend</button>
+      </div>
+      <div class="metrics-grid" id="ax-metrics"></div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:0.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;font-weight:500">Top posts by impressions</span>
+          <span style="font-size:11px;color:var(--tx3)" id="ax-post-count"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="posts-table" id="ax-table"></table>
+        </div>
+      </div>
+      <div id="ax-rec"></div>
+    </div>
+  </div>
+
+  <div id="sec-chat" class="sec">
+    <div class="card">
+      <div class="cmsg" id="chat-msgs">
+        <div class="msg a">Ready. Full 2MR Labs brief loaded — Giants OS, team, Oman MOU, voice, strategy. What do you need?</div>
+      </div>
+      <div class="cchips">
+        <button class="cchip" onclick="setChip(this)">Draft the Oman MOU announcement thread</button>
+        <button class="cchip" onclick="setChip(this)">Signal post on a recent infrastructure attack</button>
+        <button class="cchip" onclick="setChip(this)">Giants OS sensor fusion capability post</button>
+        <button class="cchip" onclick="setChip(this)">Founder statement from Lien — why he joined 2MR</button>
+        <button class="cchip" onclick="setChip(this)">Five signal post ideas for this week</button>
+      </div>
+      <div class="cir">
+        <textarea id="chat-in" placeholder="What do you need?" rows="2" style="flex:1" onkeydown="chatKey(event)"></textarea>
+        <button class="btn-p" id="chat-btn" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BRIEF=`You are the content team at 2MR Labs. Match the company voice exactly — no exceptions.
+
+COMPANY
+2MR Labs (Tomorrow Labs). Singapore. Founded 2022. Profitable FY2025. AI-driven intelligence systems for governments, defence ministries, sovereign institutions. Pre-Series A $25M. NASDAQ target Q4 2026. MOU signed with Oman.
+
+REPOSITIONING NARRATIVE
+Not a pivot — a recognition. The same AI systems built for high-stakes complex environments. Geopolitical instability clarified the mission. Structural (not cyclical) instability. Critical infrastructure is a target. Nations must ask: who builds the AI, who controls it, whose interests does it serve. Governments that move now to build sovereign AI will enter the next decade with a structural advantage.
+
+GIANTS OS
+AI-driven defence platform. Compresses decision cycles from minutes to seconds. 6 parallel specialist AI agents: Kinetix (kinetic/threat/weapon-target pairing), Daemon (cyber/SIEM/kill chain across 7 stages), Vibe (OSINT — highest prompt injection risk, structural output limits), Planner (mission planning/ROE compliance/geofence), Quartermaster (logistics/asset reservation), BDA (battle damage assessment pre/post-strike). Multi-sensor fusion: radar, EO, SAR, SIGINT, ADS-B, Link 16, acoustic — Extended Kalman Filter + Hungarian algorithm for real-time track assignment. Threat scoring 0–100 across 7 intelligence sources; above 80 = Critical. 4-stage safety pipeline: Detection (50+ injection patterns, ROE bypass blocking, strike order injection blocking), Validation, Policy, Leak Scan. Zero-trust: Open/Secret/Top Secret data model, upward-only data flow, oracle-attack elimination. Intel SGX hardware enclaves — keys sealed to binary measurement, root-level access cannot extract them. Single static binary — same build runs air-gapped edge, SATCOM tactical, enterprise. No foreign cloud. Human-in-loop enforced architecturally. Demo: giants-defense.vercel.app
+
+TEAM
+Arthur Lin — CEO. arthur.lin@2mrlabs.com
+Lien Choong Luen — Strategic Consultant. SAF Senior Lieutenant Colonel, Commando Formation, 1,000+ personnel, Best Combat Unit. US Army Ranger School. US Marines Officer Course. UN East Timor peacekeeping — organised Timor-Leste's first presidential election, 2002. 6 years Assistant Director, Singapore Ministry of Defence Future Systems and Technology Directorate. UC Berkeley BA Applied Mathematics — Chancellor's Scholar. Cambridge MA Pure Mathematics. McKinsey Center for Government 5 years — led Sierra Leone post-Ebola reconstruction. Gojek Singapore General Manager from February 2019. Everest 2010. K2 2014. Gobi March 250km/50°C. Amazon ultramarathon 250km. North Pole trek. Gold Asian Masters Athletics 800m 2016. Pattern: deliberate, consistent orientation toward the hardest available problem.
+Rayna Ren — AI Lead. Engineering at Intel and SAP. Co-founded Wearapay ($10M raised). Built the multi-agent architecture behind Giants Protocol and Giants OS — same architecture, two completely different high-stakes domains.
+
+POSITIONING
+Neutral. Not US-aligned like Palantir or Anduril. Singapore-based. Serves MENA, Africa, Southeast Asia — governments that cannot or will not depend on US platforms for their most sensitive operations.
+
+VOICE — match exactly
+Short, declarative sentences. "Not X. It is Y." constructions. No corporate jargon. No "excited to share." Technical precision — name the algorithm, the mountain, the year. Urgency without alarm. Human detail in founder content.
+Examples: "That is not a feature. It is a design prerequisite." / "The technical foundations were already aligned. The mission gave them a direction." / "Tomorrow, for us, has always been a direction — not a destination. The world has made it a mission."`;
+
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const FULL_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+const SIGNAL_POOL=[
+  'Geopolitical flash — a recent infrastructure incident or AI arms race signal seen through the sovereignty lens',
+  'A government AI procurement revealing which nations are building sovereign capability and which are not',
+  'Energy or maritime infrastructure targeted — what AI-driven situational awareness could have detected earlier',
+  'Defence AI policy signal from a MENA, African, or Southeast Asian government',
+  'Cyber attack on critical infrastructure — what changes when you have sovereign AI intelligence',
+  'AI weapon system announced by a major power — implications for smaller non-aligned nations',
+  'Supply chain disruption with an infrastructure intelligence angle — the data was already there',
+  'Space-based asset used in regional conflict — how signals intelligence is evolving',
+  'Port or logistics corridor disruption — the operational awareness gap in real time',
+  'US or Chinese AI platform enters a new government market — what it means for sovereignty',
+  'OSINT reveals military movement before official acknowledgement — the open-source intelligence shift',
+  'Nuclear or energy policy shift that connects to infrastructure resilience'
+];
+const CAPABILITY_POOL=[
+  'Giants OS sensor fusion — how 7 intelligence sources become one real-time track picture',
+  'Zero-trust architecture — how classification is a first-class property of the data model, not a label applied afterward',
+  'Single binary deployment — what air-gapped actually means and why it matters for MENA governments',
+  'The 4-stage safety pipeline — built before the operational layer, not added after',
+  'Threat scoring 0–100 across 7 intelligence sources — why confidence scales with corroboration',
+  'COA synthesis — three agents, 90-second timeout, prioritised recommendations for the commander',
+  'The EW manager — how jamming deconfliction prevents ISR self-blinding by design',
+  'Intel SGX hardware enclaves — why root access to the host OS cannot extract the keys',
+  'ROE engine — how human authority over kinetic decisions is enforced architecturally, not by policy',
+  'Weapon-target assignment — greedy priority with Lanchester-weighted probability of kill',
+  'SIGINT spectrum analysis — emitter position fixes through angle-of-arrival triangulation',
+  'The six specialist agents running in parallel — what this means for kill chain latency'
+];
+const FOUNDER_POOL=[
+  'Lien on the K2 logic — why choosing the harder problem is a strategy, not recklessness',
+  'Arthur on neutrality — why Singapore-based and non-aligned is a structural advantage, not a compromise',
+  'Lien on Sierra Leone — what leading under zero margin for error teaches you about operational AI',
+  'Rayna Ren on building the same multi-agent architecture in two completely different high-stakes domains',
+  'Lien on East Timor — what organising a country\'s first presidential election taught him about institutional capability',
+  'Arthur on 2MR meaning Tomorrow — why near-term problems matter more than distant horizons',
+  'Lien on Gojek — what urban-scale AI operations teach you about latency as an operational constraint',
+  'The team combination that matters — special forces, government strategists, AI engineers, and why all three',
+  'Arthur on the window — why nations that move on sovereign AI now define the next decade',
+  'Lien on McKinsey and government capability — what building institutions under pressure actually requires',
+  'Lien on the decade in uniform — why operational experience and technological fluency must be built together',
+  'Lien on the Gobi March — 250km at 50°C and what it reveals about preparation under genuine uncertainty'
+];
+const LONGFORM_POOL=[
+  'Why sovereign AI is the defining infrastructure question of this decade',
+  'Giants OS: closing the gap between sensor and decision',
+  'The neutrality advantage: why MENA governments will not buy sovereign AI from Palantir or Anduril',
+  'The team behind the technology: built for high-stakes environments before defence was the mission',
+  'What defence AI should actually be — not what is technically impressive to demonstrate',
+  'The pivot that was already there: how the same architecture serves two completely different domains',
+  'AI sovereignty in MENA: the window is open, but it will not stay open',
+  'Infrastructure resilience and the AI era — the systems governments depend on are exposed',
+  'Security that goes all the way down: why classification must be structural, not applied afterward',
+  'The Oman MOU and what it signals about sovereign AI in the Gulf',
+  'Building for where governments actually operate — not well-connected, well-resourced environments',
+  'Tomorrow Labs: why the company was always pointing toward this moment'
+];
+
+const PILL_MAP={signal:'pill-sig',capability:'pill-alt',founder:'pill-alt',longform:'pill-lf'};
+const LABEL_MAP={signal:'Signal post',capability:'Capability post',founder:'Founder voice',longform:'Long-form drop'};
+const CH_MAP={signal:'X only',capability:'X + LinkedIn',founder:'X + LinkedIn',longform:'X thread + Medium + LinkedIn'};
+const FMT_MAP={signal:['x-post'],capability:['x-post','x-thread','linkedin'],founder:['x-post','x-thread','linkedin'],longform:['x-thread','medium','linkedin']};
+
+const S={ct:'signal',fmt:'x-post',chatH:[],clips:{},gFmt:{},weekOffset:0,topics:{}};
+
+function getMonday(d){const c=new Date(d);const day=c.getDay();c.setDate(c.getDate()-(day===0?6:day-1));c.setHours(0,0,0,0);return c;}
+function thisMonday(){return getMonday(new Date());}
+function wKey(mon){return`${mon.getFullYear()}-${mon.getMonth()}-${mon.getDate()}`;}
+
+function suggestion(type,isAlt,n){
+  if(type==='signal')return SIGNAL_POOL[n%SIGNAL_POOL.length];
+  if(type==='longform')return LONGFORM_POOL[n%LONGFORM_POOL.length];
+  if(type==='capability')return isAlt?FOUNDER_POOL[n%FOUNDER_POOL.length]:CAPABILITY_POOL[n%CAPABILITY_POOL.length];
+  if(type==='founder')return isAlt?CAPABILITY_POOL[n%CAPABILITY_POOL.length]:FOUNDER_POOL[n%FOUNDER_POOL.length];
+  return '';
+}
+
+function thuType(absWeek){return absWeek%2===0?{type:'capability',isAlt:false}:{type:'founder',isAlt:false};}
+
+function showTab(id,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('sec-'+id).classList.add('on');el.classList.add('on');
+}
+function setV(k,v,b){S[k]=v;const g=b.closest('.tg');if(g)g.querySelectorAll('.ch').forEach(c=>c.classList.remove('on'));b.classList.add('on');}
+function shiftWeeks(n){S.weekOffset=n===0?0:S.weekOffset+n;renderCal();}
+
+function renderCal(){
+  const base=thisMonday();
+  const start=new Date(base);start.setDate(start.getDate()+S.weekOffset*7);
+  const end=new Date(start);end.setDate(end.getDate()+3*7+5);
+  const sameYear=start.getFullYear()===end.getFullYear();
+  document.getElementById('nav-lbl').textContent=
+    FULL_MONTHS[start.getMonth()]+(start.getMonth()!==end.getMonth()?` – ${FULL_MONTHS[end.getMonth()]}`:'')+` ${end.getFullYear()}`;
+  document.getElementById('nav-sub').textContent=S.weekOffset===0?'Current 4 weeks':S.weekOffset>0?`${S.weekOffset} week${S.weekOffset>1?'s':''} ahead`:`${Math.abs(S.weekOffset)} week${Math.abs(S.weekOffset)>1?'s':''} back`;
+
+  const today=new Date();today.setHours(0,0,0,0);
+  let html='';
+  for(let w=0;w<4;w++){
+    const mon=new Date(start);mon.setDate(mon.getDate()+w*7);
+    const tue=new Date(mon);tue.setDate(tue.getDate()+1);
+    const thu=new Date(mon);thu.setDate(thu.getDate()+3);
+    const sat=new Date(mon);sat.setDate(sat.getDate()+5);
+    const mk=wKey(mon);
+    const absW=S.weekOffset+w;
+    const td=thuType(absW);
+    const past=sat<today;
+    const rows=[
+      {date:tue,sk:`${mk}-tue`,day:'Tue',type:'signal',isAlt:false,n:absW},
+      {date:thu,sk:`${mk}-thu`,day:'Thu',type:td.type,isAlt:td.isAlt,n:absW},
+      {date:sat,sk:`${mk}-sat`,day:'Sat',type:'longform',isAlt:false,n:absW}
+    ];
+    const lbl=`${mon.getDate()} ${MONTHS[mon.getMonth()]} – ${sat.getDate()} ${MONTHS[sat.getMonth()]} ${sat.getFullYear()}`;
+    html+=`<div class="wk"${past?' style="opacity:.5"':''}>
+      <div class="wk-hd"><span class="wk-lbl">Week of ${mon.getDate()} ${MONTHS[mon.getMonth()]}</span><span class="wk-dt">${lbl}</span></div>`;
+    rows.forEach(({date,sk,day,type,isAlt,n})=>{
+      const sugg=suggestion(type,isAlt,n);
+      const topic=S.topics[sk]!==undefined?S.topics[sk]:sugg;
+      html+=`<div>
+        <div class="day-row">
+          <div class="day-nm">${day}<br><span style="font-weight:400;opacity:.65;font-size:10px">${date.getDate()} ${MONTHS[date.getMonth()]}</span></div>
+          <div class="day-body">
+            <div class="pill ${PILL_MAP[type]}">${LABEL_MAP[type]}</div>
+            <textarea class="topic-field" id="tf-${sk}" rows="2"
+              oninput="onTopicInput('${sk}',this)"
+              onfocus="autoH(this)" oninput="autoH(this);onTopicInput('${sk}',this)"
+            >${esc(topic)}</textarea>
+            <div class="edit-hint">Click to edit</div>
+            <div class="day-ch">${CH_MAP[type]}</div>
+          </div>
+          <div class="day-act"><button class="btn-g" onclick="openSlot('${sk}','${type}')">Draft</button></div>
+        </div>
+        <div class="slot-panel" id="slot-${sk}"></div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  document.getElementById('cal-weeks').innerHTML=html;
+  document.querySelectorAll('.topic-field').forEach(autoH);
+}
+
+function onTopicInput(sk,el){S.topics[sk]=el.value;}
+function autoH(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function openSlot(sk,type){
+  const panel=document.getElementById('slot-'+sk);
+  if(panel.classList.contains('open')){panel.classList.remove('open');panel.innerHTML='';return;}
+  const fmts=FMT_MAP[type]||['x-post'];
+  if(!S.gFmt[sk])S.gFmt[sk]=fmts[0];
+  panel.innerHTML=`
+    <div style="margin-bottom:10px"><label style="margin-bottom:6px;display:block">Format</label>
+      <div class="tg">${fmts.map(f=>`<button class="ch${S.gFmt[sk]===f?' on':''}" onclick="setSlotFmt('${sk}','${f}',this)">${fmtL(f)}</button>`).join('')}</div>
+    </div>
+    <div style="margin-bottom:12px"><label style="margin-bottom:6px;display:block">Additional context or news hook (optional)</label>
+      <input type="text" id="gctx-${sk}" placeholder="Paste a headline, add an angle, or leave blank to use the topic above…">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <button class="btn-p" id="gbtn-${sk}" onclick="runSlot('${sk}','${type}')">Generate</button>
+      <button class="btn-g" onclick="openSlot('${sk}','')">Cancel</button>
+    </div>
+    <div id="gout-${sk}"></div>`;
+  panel.classList.add('open');
+  setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),40);
+}
+
+function fmtL(f){return{'x-post':'X post','x-thread':'X thread','linkedin':'LinkedIn','medium':'Medium'}[f]||f;}
+function setSlotFmt(sk,f,b){S.gFmt[sk]=f;const g=b.closest('.tg');if(g)g.querySelectorAll('.ch').forEach(c=>c.classList.remove('on'));b.classList.add('on');}
+
+async function runSlot(sk,type){
+  const tf=document.getElementById('tf-'+sk);
+  const topic=tf?tf.value.trim():'a relevant 2MR Labs topic';
+  const ctx=(document.getElementById('gctx-'+sk)||{}).value||'';
+  const fmt=S.gFmt[sk]||'x-post';
+  const btn=document.getElementById('gbtn-'+sk);btn.disabled=true;btn.textContent='Writing…';
+  const out=document.getElementById('gout-'+sk);
+  out.innerHTML=`<div class="ld" style="margin-top:10px"><div class="dots"><span></span><span></span><span></span></div><span>Writing…</span></div>`;
+  let acc='';
+  await api({sys:BRIEF,msgs:[{role:'user',content:buildP(type,fmt,topic,ctx.trim())}],tok:fmt==='medium'?2000:800,
+    onT:t=>{acc+=t;S.clips['s-'+sk]=acc;renderOut(fmt,acc,'s-'+sk,out);},
+    onD:()=>{btn.disabled=false;btn.textContent='Generate';},
+    onE:e=>{out.innerHTML=`<p class="err" style="margin-top:8px">Error: ${e}</p>`;btn.disabled=false;btn.textContent='Generate';}
+  });
+}
+
+function buildP(type,fmt,topic,ctx){
+  const tp={
+    signal:'Content type: Signal post. A world event, infrastructure incident, geopolitical move, or AI development filtered through the sovereignty lens. State what happened and what it means. No analysis theatre.',
+    capability:'Content type: Capability post. Giants OS architecture or a specific design decision. Name the real technology. Explain the thinking. Show the actual system.',
+    founder:'Content type: Founder voice. Lien Choong Luen or Arthur Lin taking a personal position. Draw on specific experience — Sierra Leone, K2, military command, Gojek. Human, specific, direct.',
+    longform:'Content type: Long-form piece. One clear, well-argued position. Opinionated, technically grounded, no hedging.'
+  };
+  const fp={
+    'x-post':'Format: single X post. Max 280 characters. No hashtags. Declarative and minimal. Return only the post text, nothing else.',
+    'x-thread':'Format: X thread of 5–7 tweets. Separate each tweet with exactly "---" on its own line. Max 280 chars each. No tweet numbers, no hashtags. First tweet is a standalone hook.',
+    'linkedin':'Format: LinkedIn post, 150–300 words. Open with a single declarative statement — no filler opener, no emoji, no "excited to share."',
+    'medium':'Format: Medium article, 800–1100 words. Markdown: # title, ## section headers (short, declarative). 4–6 sections. End with a one-sentence 2MR Labs description.'
+  };
+  return`${tp[type]||''}\n${fp[fmt]||''}\nTopic: ${topic}${ctx?'\nContext/angle: '+ctx:''}`;
+}
+
+function renderOut(fmt,acc,key,el){
+  if(fmt==='x-post'){
+    el.innerHTML=`<div class="oa"><div class="ot">${esc(acc)}</div><div class="tw-l">${acc.length}/280</div></div><div class="orow"><button class="cp" onclick="doCopy('${key}',this)">Copy</button></div>`;
+  } else if(fmt==='x-thread'){
+    const ts=acc.split(/^---$/m).map(t=>t.trim()).filter(t=>t.length>2);
+    el.innerHTML=ts.map((t,i)=>`<div class="tw-card"><div class="tw-num">Tweet ${i+1} · ${t.length}/280</div><div class="ot">${esc(t)}</div></div>`).join('')+`<div class="orow"><button class="cp" onclick="doCopy('${key}',this)">Copy all</button></div>`;
+  } else if(fmt==='medium'){
+    el.innerHTML=`<div class="oa art">${mdH(acc)}</div><div class="orow"><button class="cp" onclick="doCopy('${key}',this)">Copy markdown</button></div>`;
+  } else {
+    el.innerHTML=`<div class="oa"><div class="ot">${esc(acc)}</div></div><div class="orow"><button class="cp" onclick="doCopy('${key}',this)">Copy</button></div>`;
+  }
+}
+
+function doCopy(key,btn){
+  navigator.clipboard.writeText(S.clips[key]||'').then(()=>{btn.textContent='Copied!';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('ok');},1600);});
+}
+
+async function genCreate(){
+  const ctx=document.getElementById('cr-ctx').value.trim();
+  const btn=document.getElementById('cr-btn');btn.disabled=true;btn.textContent='Writing…';
+  const out=document.getElementById('cr-out');
+  out.innerHTML=`<div class="ld" style="margin-top:12px"><div class="dots"><span></span><span></span><span></span></div><span>Writing…</span></div>`;
+  let acc='';
+  await api({sys:BRIEF,msgs:[{role:'user',content:buildP(S.ct,S.fmt,ctx||'Choose a relevant and timely 2MR Labs topic.','')}],tok:S.fmt==='medium'?2000:800,
+    onT:t=>{acc+=t;S.clips.cr=acc;renderOut(S.fmt,acc,'cr',out);},
+    onD:()=>{btn.disabled=false;btn.textContent='Generate';},
+    onE:e=>{out.innerHTML=`<p class="err" style="margin-top:12px">Error: ${e}</p>`;btn.disabled=false;btn.textContent='Generate';}
+  });
+}
+
+function setChip(b){document.getElementById('chat-in').value=b.textContent.trim();document.getElementById('chat-in').focus();}
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+
+async function sendChat(){
+  const inp=document.getElementById('chat-in');const txt=inp.value.trim();if(!txt)return;
+  inp.value='';const btn=document.getElementById('chat-btn');btn.disabled=true;
+  const box=document.getElementById('chat-msgs');
+  box.innerHTML+=`<div class="msg u">${esc(txt)}</div>`;
+  S.chatH.push({role:'user',content:txt});
+  const div=document.createElement('div');div.className='msg a';div.textContent='';
+  box.appendChild(div);box.scrollTop=box.scrollHeight;
+  let acc='';
+  await api({sys:BRIEF,msgs:S.chatH,tok:1400,
+    onT:t=>{acc+=t;div.textContent=acc;box.scrollTop=box.scrollHeight;},
+    onD:()=>{S.chatH.push({role:'assistant',content:acc});btn.disabled=false;inp.focus();},
+    onE:e=>{div.textContent=`Error: ${e}`;div.style.color='#E24B4A';btn.disabled=false;}
+  });
+}
+
+function getKey(){return localStorage.getItem('anthropic_key')||'';}
+
+function saveKey(){
+  const v=document.getElementById('key-input').value.trim();
+  if(!v||!v.startsWith('sk-')){alert('Please enter a valid Anthropic API key (starts with sk-ant-).');return;}
+  localStorage.setItem('anthropic_key',v);
+  document.getElementById('setup-screen').classList.add('hidden');
+}
+
+function promptKey(){
+  const cur=getKey();
+  const v=prompt('Paste your Anthropic API key (starts with sk-ant-):', cur?'sk-ant-…  [key set, paste new to replace]':'');
+  if(v&&v.startsWith('sk-')){localStorage.setItem('anthropic_key',v);alert('Key updated.');}
+  else if(v!==null&&v!==''){alert('Invalid key — must start with sk-ant-');}
+}
+
+function checkKey(){
+  if(!getKey()) document.getElementById('setup-screen').classList.remove('hidden');
+}
+
+async function api({sys,msgs,tok,onT,onD,onE}){
+  const key=getKey();
+  if(!key){onE('No API key. Click the key indicator in the header to add one.');return;}
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:tok||1200,stream:true,system:sys,messages:msgs})
+    });
+    if(!r.ok){const e=await r.json().catch(()=>({}));onE(e.error?.message||`HTTP ${r.status}`);return;}
+    const rd=r.body.getReader();const dc=new TextDecoder();let buf='';
+    while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});const ls=buf.split('\n');buf=ls.pop()||'';for(const l of ls){if(!l.startsWith('data: '))continue;const raw=l.slice(6);if(raw==='[DONE]')continue;try{const o=JSON.parse(raw);if(o.type==='content_block_delta'&&o.delta?.type==='text_delta')onT(o.delta.text);}catch{}}}
+    onD();
+  }catch(e){onE(e.message);}
+}
+
+function mdH(t){
+  let h=t.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/^[-*] (.+)$/gm,'<li>$1</li>').replace(/((?:<li>[^\n]*<\/li>\n?)+)/g,m=>'<ul>'+m+'</ul>');
+  const ls=h.split('\n');const o=[];let p=false;
+  for(const l of ls){const t2=l.trim();if(!t2){if(p){o.push('</p>');p=false;}continue;}if(/^<[hul]/.test(t2)){if(p){o.push('</p>');p=false;}o.push(t2);}else{if(!p){o.push('<p>');p=true;}o.push(t2+' ');}}
+  if(p)o.push('</p>');return o.join('');
+}
+
+let AX = null;
+
+function handleFile(file) {
+  if (!file || !file.name.endsWith('.csv')) { alert('Please upload a .csv file from X analytics.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => parseCSV(e.target.result, file.name);
+  reader.readAsText(file);
+}
+
+function parseCSV(text, filename) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) { alert('CSV appears empty.'); return; }
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+  const find = (...keys) => { for (const k of keys) { const i = headers.findIndex(h => h.includes(k)); if (i >= 0) return i; } return -1; };
+  const iText = find('tweet text', 'text');
+  const iTime = find('time', 'date');
+  const iImp = find('impression');
+  const iEng = find('engagement', 'engagements');
+  const iRate = find('engagement rate', 'rate');
+  const iRT = find('retweet');
+  const iLike = find('like');
+  const iReply = find('repl');
+  const iClick = find('url click', 'link click');
+  if (iImp < 0) { alert('Could not find impressions column. Make sure this is an X tweet activity export.'); return; }
+
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCSVLine(lines[i]);
+    if (cols.length < 3) continue;
+    const get = idx => idx >= 0 ? (cols[idx] || '').replace(/^"|"$/g, '').trim() : '';
+    const num = idx => { const v = parseFloat(get(idx).replace('%','')); return isNaN(v) ? 0 : v; };
+    const imp = num(iImp); if (imp === 0 && i > 1) continue;
+    rows.push({
+      text: get(iText).slice(0, 200),
+      time: get(iTime),
+      impressions: imp,
+      engagements: num(iEng),
+      rate: num(iRate),
+      retweets: num(iRT),
+      likes: num(iLike),
+      replies: num(iReply),
+      clicks: num(iClick)
+    });
+  }
+  if (rows.length === 0) { alert('No tweet data found in this file.'); return; }
+  rows.sort((a, b) => b.impressions - a.impressions);
+
+  const totalImp = rows.reduce((s, r) => s + r.impressions, 0);
+  const totalEng = rows.reduce((s, r) => s + r.engagements, 0);
+  const avgRate = rows.reduce((s, r) => s + r.rate, 0) / rows.length;
+  const dates = rows.map(r => r.time).filter(Boolean).sort();
+  const period = dates.length ? `${dates[0].slice(0,10)} – ${dates[dates.length-1].slice(0,10)}` : filename;
+
+  AX = { rows, totalImp, totalEng, avgRate, period, count: rows.length };
+  renderAnalytics();
+}
+
+function splitCSVLine(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { inQ = !inQ; }
+    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += line[i]; }
+  }
+  result.push(cur); return result;
+}
+
+function fmt(n) { return n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'K' : Math.round(n).toString(); }
+function fmtPct(n) { return n.toFixed(2)+'%'; }
+
+function renderAnalytics() {
+  if (!AX) return;
+  document.getElementById('ax-upload').style.display = 'none';
+  document.getElementById('ax-data').style.display = 'block';
+  document.getElementById('ax-period').textContent = AX.period;
+  document.getElementById('ax-post-count').textContent = `${AX.count} posts`;
+
+  const bestPost = AX.rows[0];
+  document.getElementById('ax-metrics').innerHTML = `
+    <div class="metric-card"><div class="metric-lbl">Total impressions</div><div class="metric-val">${fmt(AX.totalImp)}</div></div>
+    <div class="metric-card"><div class="metric-lbl">Total engagements</div><div class="metric-val">${fmt(AX.totalEng)}</div></div>
+    <div class="metric-card"><div class="metric-lbl">Avg engagement rate</div><div class="metric-val">${fmtPct(AX.avgRate)}</div></div>
+    <div class="metric-card"><div class="metric-lbl">Posts analysed</div><div class="metric-val">${AX.count}</div><div class="metric-sub">in period</div></div>
+    <div class="metric-card"><div class="metric-lbl">Best post impressions</div><div class="metric-val">${fmt(bestPost.impressions)}</div><div class="metric-sub">${fmtPct(bestPost.rate)} eng rate</div></div>`;
+
+  const maxImp = AX.rows[0].impressions || 1;
+  const top = AX.rows.slice(0, 10);
+  document.getElementById('ax-table').innerHTML = `
+    <thead><tr>
+      <th>Post</th><th class="num">Impressions</th><th class="num">Eng rate</th><th class="num">Likes</th><th class="num">RTs</th>
+    </tr></thead>
+    <tbody>${top.map(r => `<tr>
+      <td class="post-text">
+        ${esc(r.text.slice(0, 120))}${r.text.length > 120 ? '…' : ''}
+        <div class="eng-bar"><div class="eng-fill" style="width:${Math.round(r.impressions/maxImp*100)}%"></div></div>
+      </td>
+      <td class="num">${fmt(r.impressions)}</td>
+      <td class="num">${fmtPct(r.rate)}</td>
+      <td class="num">${fmt(r.likes)}</td>
+      <td class="num">${fmt(r.retweets)}</td>
+    </tr>`).join('')}</tbody>`;
+}
+
+function resetAnalytics() {
+  AX = null;
+  document.getElementById('ax-upload').style.display = 'block';
+  document.getElementById('ax-data').style.display = 'none';
+  document.getElementById('ax-rec').innerHTML = '';
+  document.getElementById('csv-input').value = '';
+}
+
+async function runAnalysis() {
+  if (!AX) return;
+  const btn = document.getElementById('ax-analyse-btn');
+  btn.disabled = true; btn.textContent = 'Analysing…';
+  const rec = document.getElementById('ax-rec');
+  rec.innerHTML = `<div class="ld" style="margin-top:14px"><div class="dots"><span></span><span></span><span></span></div><span>Analysing your data…</span></div>`;
+
+  const top5 = AX.rows.slice(0, 5).map((r, i) =>
+    `${i+1}. "${r.text.slice(0,120)}" — ${fmt(r.impressions)} impressions, ${fmtPct(r.rate)} eng rate, ${fmt(r.likes)} likes, ${fmt(r.retweets)} RTs`
+  ).join('\n');
+  const bot5 = AX.rows.slice(-5).map((r, i) =>
+    `${i+1}. "${r.text.slice(0,80)}" — ${fmt(r.impressions)} impressions, ${fmtPct(r.rate)} eng rate`
+  ).join('\n');
+
+  const dataPrompt = `Analyse this X (Twitter) analytics data for 2MR Labs and provide strategic recommendations.
+
+PERIOD: ${AX.period}
+TOTAL POSTS: ${AX.count}
+TOTAL IMPRESSIONS: ${fmt(AX.totalImp)}
+TOTAL ENGAGEMENTS: ${fmt(AX.totalEng)}
+AVERAGE ENGAGEMENT RATE: ${fmtPct(AX.avgRate)}
+
+TOP 5 POSTS BY IMPRESSIONS:
+${top5}
+
+BOTTOM 5 POSTS BY IMPRESSIONS:
+${bot5}
+
+Provide:
+1. **Performance summary** — what the numbers tell us about 2MR Labs' current X presence (2-3 sentences, direct)
+2. **What's working** — patterns in the top posts: topics, formats, angles, language that drives engagement
+3. **What isn't working** — what the low-performing posts have in common, what to avoid
+4. **3 concrete recommendations for next week** — specific post ideas with suggested angles, tied directly to what the data shows is working. Each recommendation should be one clear sentence describing exactly what to post and why the data supports it.
+
+Be direct, specific, and data-driven. Reference actual numbers from the data. No generic advice.`;
+
+  let acc = '';
+  await api({
+    sys: BRIEF + '\n\nYou are also a social media analyst. When given X analytics data, provide sharp, data-driven analysis and specific actionable recommendations. Reference actual numbers. No generic advice.',
+    msgs: [{ role: 'user', content: dataPrompt }],
+    tok: 1200,
+    onT: t => { acc += t; rec.innerHTML = `<div class="ai-rec">${mdH(acc)}</div>`; },
+    onD: () => { btn.disabled = false; btn.textContent = 'Analyse & recommend'; },
+    onE: e => { rec.innerHTML = `<p class="err" style="margin-top:12px">Error: ${e}</p>`; btn.disabled = false; btn.textContent = 'Analyse & recommend'; }
+  });
+}
+
+checkKey();
+renderCal();
+</script>
+</body>
+</html>
