@@ -1,0 +1,2386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>2MR Labs — Content Calendar</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --m: #A32D2D; --mb: #FCEBEB; --mbd: #F09595; --mt: #501313;
+    --bg: #ffffff; --bg2: #f7f6f3; --bg3: #f0eeea;
+    --tx: #1a1a18; --tx2: #5f5e5a; --tx3: #9a9893;
+    --bd: rgba(0,0,0,0.12); --bd2: rgba(0,0,0,0.22);
+    --r: 8px; --rl: 12px;
+    --c-sig: #185FA5; --c-sig-bg: #E6F1FB; --c-sig-bd: #85B7EB; --c-sig-t: #042C53;
+    --c-alt: #854F0B; --c-alt-bg: #FAEEDA; --c-alt-bd: #EF9F27; --c-alt-t: #412402;
+    --c-lf: #534AB7; --c-lf-bg: #EEEDFE; --c-lf-bd: #AFA9EC; --c-lf-t: #26215C;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --m: #E24B4A; --mb: #501313; --mbd: #A32D2D; --mt: #F7C1C1;
+      --bg: #1c1c1a; --bg2: #242422; --bg3: #2c2c2a;
+      --tx: #f0eeea; --tx2: #b4b2a9; --tx3: #666460;
+      --bd: rgba(255,255,255,0.1); --bd2: rgba(255,255,255,0.2);
+      --c-sig: #378ADD; --c-sig-bg: #042C53; --c-sig-bd: #185FA5; --c-sig-t: #B5D4F4;
+      --c-alt: #BA7517; --c-alt-bg: #412402; --c-alt-bd: #854F0B; --c-alt-t: #FAC775;
+      --c-lf: #7F77DD; --c-lf-bg: #26215C; --c-lf-bd: #534AB7; --c-lf-t: #CECBF6;
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--tx); min-height: 100vh; }
+  #shell { max-width: 800px; margin: 0 auto; padding: 24px 16px 80px; }
+  .brand { display: flex; align-items: baseline; gap: 10px; padding-bottom: 14px; border-bottom: 0.5px solid var(--bd); margin-bottom: 18px; }
+  .bn { font-size: 17px; font-weight: 500; color: var(--m); }
+  .bt { font-size: 12px; color: var(--tx3); }
+  .tabs { display: flex; border-bottom: 0.5px solid var(--bd); margin-bottom: 20px; }
+  .tab { padding: 8px 16px; font-size: 13px; color: var(--tx2); background: transparent; border: none; border-bottom: 2px solid transparent; cursor: pointer; font-family: inherit; margin-bottom: -0.5px; transition: color .12s, border-color .12s; white-space: nowrap; }
+  .tab:hover { color: var(--tx); }
+  .tab.on { color: var(--m); border-bottom-color: var(--m); font-weight: 500; }
+  .sec { display: none; }
+  .sec.on { display: block; }
+  .card { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); padding: 16px 18px; margin-bottom: 12px; }
+  label { font-size: 12px; color: var(--tx2); display: block; margin-bottom: 6px; }
+  .fg { margin-bottom: 14px; }
+  input[type=text], textarea, select { width: 100%; padding: 8px 10px; font-size: 13px; font-family: inherit; background: var(--bg2); border: 0.5px solid var(--bd); border-radius: var(--r); color: var(--tx); outline: none; transition: border-color .12s; }
+  input[type=text]:focus, textarea:focus { border-color: var(--bd2); }
+  textarea { min-height: 68px; resize: vertical; line-height: 1.6; }
+  .tg { display: flex; gap: 6px; flex-wrap: wrap; }
+  .ch { padding: 5px 12px; font-size: 12px; cursor: pointer; border: 0.5px solid var(--bd2); border-radius: var(--r); background: transparent; color: var(--tx2); font-family: inherit; transition: all .1s; white-space: nowrap; }
+  .ch:hover { color: var(--tx); }
+  .ch.on { background: var(--mb); color: var(--mt); border-color: var(--mbd); font-weight: 500; }
+  .btn-p { padding: 8px 20px; font-size: 13px; font-weight: 500; background: var(--m); color: #fff; border: none; border-radius: var(--r); cursor: pointer; font-family: inherit; transition: opacity .12s; white-space: nowrap; }
+  .btn-p:hover { opacity: .85; }
+  .btn-p:disabled { opacity: .38; cursor: not-allowed; }
+  .btn-g { padding: 6px 12px; font-size: 12px; background: transparent; border: 0.5px solid var(--bd2); border-radius: var(--r); color: var(--tx2); cursor: pointer; font-family: inherit; transition: all .12s; white-space: nowrap; }
+  .btn-g:hover { color: var(--tx); }
+  .nav-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .nav-info { display: flex; flex-direction: column; gap: 2px; }
+  .nav-lbl { font-size: 14px; font-weight: 500; }
+  .nav-sub { font-size: 11px; color: var(--tx3); }
+  .nav-btns { display: flex; gap: 6px; }
+  .leg { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+  .leg-i { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--tx2); }
+  .leg-d { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+  .wk { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); overflow: hidden; margin-bottom: 10px; }
+  .wk-hd { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 0.5px solid var(--bd); background: var(--bg2); }
+  .wk-lbl { font-size: 12px; font-weight: 500; }
+  .wk-dt { font-size: 11px; color: var(--tx3); }
+  .day-row { display: grid; grid-template-columns: 68px 1fr auto; align-items: start; border-bottom: 0.5px solid var(--bd); }
+  .day-row:last-child { border-bottom: none; }
+  .day-nm { padding: 14px 10px; font-size: 11px; font-weight: 500; color: var(--tx3); text-transform: uppercase; letter-spacing: .5px; border-right: 0.5px solid var(--bd); line-height: 1.6; }
+  .day-body { padding: 10px 14px; min-width: 0; }
+  .day-act { padding: 10px 10px; }
+  .pill { display: inline-block; font-size: 10px; font-weight: 500; padding: 2px 8px; border-radius: var(--r); margin-bottom: 5px; }
+  .pill-sig { background: var(--c-sig-bg); color: var(--c-sig-t); border: 0.5px solid var(--c-sig-bd); }
+  .pill-alt { background: var(--c-alt-bg); color: var(--c-alt-t); border: 0.5px solid var(--c-alt-bd); }
+  .pill-lf { background: var(--c-lf-bg); color: var(--c-lf-t); border: 0.5px solid var(--c-lf-bd); }
+  .topic-field { width: calc(100% + 8px); margin-left: -4px; font-size: 12px; font-family: inherit; background: transparent; border: 0.5px solid transparent; border-radius: var(--r); color: var(--tx2); padding: 3px 4px; line-height: 1.55; resize: none; overflow: hidden; transition: border-color .12s, background .12s; display: block; }
+  .topic-field:hover { border-color: var(--bd); background: var(--bg2); }
+  .topic-field:focus { border-color: var(--mbd); background: var(--bg2); outline: none; color: var(--tx); }
+  .edit-hint { font-size: 10px; color: var(--tx3); margin-top: 2px; }
+  .day-ch { font-size: 10px; color: var(--tx3); margin-top: 5px; }
+  .slot-panel { background: var(--bg2); border-top: 0.5px solid var(--bd); padding: 14px 16px; display: none; }
+  .slot-panel.open { display: block; }
+  .oa { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--r); padding: 14px; margin-top: 8px; }
+  .ot { font-size: 13px; line-height: 1.75; white-space: pre-wrap; color: var(--tx); word-break: break-word; }
+  .tw-l { font-size: 10px; color: var(--tx3); text-align: right; margin-top: 4px; }
+  .tw-card { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--r); padding: 12px; margin-top: 6px; }
+  .tw-num { font-size: 10px; color: var(--tx3); text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; }
+  .orow { display: flex; gap: 7px; margin-top: 8px; flex-wrap: wrap; }
+  .cp { padding: 4px 10px; font-size: 11px; border: 0.5px solid var(--bd2); border-radius: var(--r); background: transparent; color: var(--tx2); cursor: pointer; font-family: inherit; transition: all .1s; }
+  .cp:hover { color: var(--m); border-color: var(--mbd); }
+  .cp.ok { color: var(--m); border-color: var(--mbd); }
+  .ld { display: flex; align-items: center; gap: 8px; padding: 10px 0; font-size: 13px; color: var(--tx2); }
+  .dots span { width: 4px; height: 4px; background: var(--m); border-radius: 50%; display: inline-block; margin-right: 3px; animation: dp .9s infinite; }
+  .dots span:nth-child(2) { animation-delay: .15s; }
+  .dots span:nth-child(3) { animation-delay: .3s; }
+  @keyframes dp { 0%,100% { opacity: .15; } 50% { opacity: 1; } }
+  .art h1 { font-size: 16px; font-weight: 500; margin-bottom: 10px; color: var(--tx); }
+  .art h2 { font-size: 13px; font-weight: 500; margin: 14px 0 5px; color: var(--tx); }
+  .art p { font-size: 12px; line-height: 1.75; color: var(--tx2); margin-bottom: 8px; }
+  .art ul { padding-left: 16px; margin-bottom: 8px; }
+  .art li { font-size: 12px; line-height: 1.65; color: var(--tx2); margin-bottom: 2px; }
+  .art strong { color: var(--tx); font-weight: 500; }
+  .err { font-size: 13px; color: #E24B4A; padding: 10px 0; }
+  .cmsg { display: flex; flex-direction: column; gap: 8px; min-height: 200px; max-height: 420px; overflow-y: auto; margin-bottom: 12px; padding: 4px 0; }
+  .msg { padding: 10px 14px; font-size: 13px; line-height: 1.65; border-radius: var(--rl); max-width: 86%; }
+  .msg.u { background: var(--m); color: #fff; align-self: flex-end; }
+  .msg.a { background: var(--bg2); border: 0.5px solid var(--bd); align-self: flex-start; white-space: pre-wrap; color: var(--tx); }
+  .cir { display: flex; gap: 8px; align-items: flex-end; }
+  .cchips { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 8px; }
+  .cchip { padding: 4px 10px; font-size: 12px; border: 0.5px solid var(--bd2); border-radius: var(--r); background: transparent; color: var(--tx2); cursor: pointer; font-family: inherit; transition: all .1s; }
+  .cchip:hover { color: var(--m); border-color: var(--mbd); }
+  ::-webkit-scrollbar { width: 3px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--bd2); border-radius: 2px; }
+  #setup-screen { position: fixed; inset: 0; background: var(--bg3); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 24px; }
+  #setup-screen.hidden { display: none; }
+  .setup-card { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); padding: 32px 28px; max-width: 420px; width: 100%; }
+  .setup-logo { font-size: 17px; font-weight: 500; color: var(--m); margin-bottom: 6px; }
+  .setup-title { font-size: 15px; font-weight: 500; color: var(--tx); margin-bottom: 8px; }
+  .setup-desc { font-size: 13px; color: var(--tx2); line-height: 1.65; margin-bottom: 20px; }
+  .setup-desc a { color: var(--m); text-decoration: none; }
+  .setup-desc a:hover { text-decoration: underline; }
+  .setup-input-row { display: flex; gap: 8px; margin-bottom: 12px; }
+  .setup-note { font-size: 11px; color: var(--tx3); line-height: 1.5; }
+  .key-badge { display: flex; align-items: center; gap: 6px; padding: 3px 8px; font-size: 11px; color: var(--tx3); border: 0.5px solid var(--bd); border-radius: var(--r); cursor: pointer; background: transparent; font-family: inherit; transition: all .12s; margin-left: auto; }
+  .key-badge:hover { color: var(--tx); border-color: var(--bd2); }
+  .key-dot { width: 6px; height: 6px; border-radius: 50%; background: #3B6D11; flex-shrink: 0; }
+  .drop-zone { border: 1.5px dashed var(--bd2); border-radius: var(--rl); padding: 32px 24px; text-align: center; cursor: pointer; transition: all .15s; background: var(--bg); }
+  .drop-zone:hover, .drop-zone.drag { border-color: var(--m); background: var(--mb); }
+  .drop-zone input { display: none; }
+  .drop-title { font-size: 14px; font-weight: 500; color: var(--tx); margin-bottom: 5px; }
+  .drop-sub { font-size: 12px; color: var(--tx3); line-height: 1.6; }
+  .drop-link { color: var(--m); text-decoration: none; font-size: 12px; }
+  .drop-link:hover { text-decoration: underline; }
+  .metrics-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+  .metric-card { background: var(--bg2); border-radius: var(--r); padding: 14px 16px; }
+  .metric-lbl { font-size: 11px; color: var(--tx3); margin-bottom: 5px; }
+  .metric-val { font-size: 22px; font-weight: 500; color: var(--tx); line-height: 1; }
+  .metric-sub { font-size: 11px; color: var(--tx3); margin-top: 3px; }
+  .posts-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .posts-table th { text-align: left; font-size: 10px; font-weight: 500; color: var(--tx3); text-transform: uppercase; letter-spacing: .5px; padding: 6px 10px; border-bottom: 0.5px solid var(--bd); }
+  .posts-table td { padding: 9px 10px; border-bottom: 0.5px solid var(--bd); color: var(--tx2); vertical-align: top; line-height: 1.45; }
+  .posts-table tr:last-child td { border-bottom: none; }
+  .posts-table tr:hover td { background: var(--bg2); }
+  .posts-table .post-text { color: var(--tx); max-width: 340px; }
+  .posts-table .num { text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .eng-bar { height: 3px; background: var(--mb); border-radius: 2px; margin-top: 4px; }
+  .eng-fill { height: 3px; background: var(--m); border-radius: 2px; }
+  .ai-rec { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); padding: 18px; margin-top: 14px; }
+  .ai-rec h3 { font-size: 13px; font-weight: 500; color: var(--tx); margin-bottom: 10px; }
+  .ai-rec p { font-size: 13px; line-height: 1.7; color: var(--tx2); margin-bottom: 8px; }
+  .ai-rec ul { padding-left: 16px; margin-bottom: 8px; }
+  .ai-rec li { font-size: 13px; line-height: 1.65; color: var(--tx2); margin-bottom: 4px; }
+  .ai-rec strong { color: var(--tx); font-weight: 500; }
+  .ai-rec h4 { font-size: 12px; font-weight: 500; color: var(--tx); margin: 12px 0 5px; }
+  .period-badge { display: inline-block; font-size: 11px; color: var(--tx3); background: var(--bg2); border: 0.5px solid var(--bd); border-radius: var(--r); padding: 2px 8px; margin-bottom: 14px; }
+  .reset-btn { font-size: 11px; color: var(--tx3); background: transparent; border: none; cursor: pointer; font-family: inherit; text-decoration: underline; margin-left: 8px; }
+  .reset-btn:hover { color: var(--m); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; display: inline-block; margin-right: 4px; }
+  .status-posted { background: #3B6D11; }
+  .status-planned { background: #854F0B; }
+  .posted-row { background: rgba(59,109,17,0.06); }
+  .mark-btn { padding: 4px 10px; font-size: 11px; border: 0.5px solid #3B6D11; border-radius: var(--r); background: transparent; color: #3B6D11; cursor: pointer; font-family: inherit; transition: all .1s; }
+  .mark-btn:hover { background: #EAF3DE; }
+  .mark-btn.done { background: #EAF3DE; color: #27500A; border-color: #639922; }
+  .fill-btn { padding: 4px 10px; font-size: 11px; background: transparent; border: 0.5px solid var(--bd2); border-radius: var(--r); color: var(--tx3); cursor: pointer; font-family: inherit; transition: all .12s; }
+  .fill-btn:hover { color: var(--m); border-color: var(--mbd); }
+  .fill-btn:disabled { opacity: .4; cursor: not-allowed; }
+  .history-panel { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); padding: 0; overflow: hidden; margin-top: 14px; }
+  .history-hd { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-bottom: 0.5px solid var(--bd); background: var(--bg2); }
+  .history-row { display: grid; grid-template-columns: 80px 1fr auto; align-items: start; border-bottom: 0.5px solid var(--bd); padding: 9px 14px; gap: 10px; font-size: 12px; }
+  .history-row:last-child { border-bottom: none; }
+  .history-date { color: var(--tx3); font-size: 11px; line-height: 1.5; }
+  .history-text { color: var(--tx2); line-height: 1.5; }
+  .history-type { font-size: 10px; font-weight: 500; color: var(--tx3); white-space: nowrap; }
+  .del-btn { font-size: 11px; color: var(--tx3); background: transparent; border: none; cursor: pointer; font-family: inherit; padding: 2px 4px; }
+  .topic-field.topic-empty { color: var(--tx3); font-style: italic; }
+  .topic-field.topic-empty:focus { color: var(--tx); font-style: normal; }
+  .hooks-panel { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); padding: 14px 16px; margin-bottom: 14px; }
+  .hooks-toggle { display: flex; align-items: center; justify-content: space-between; cursor: pointer; user-select: none; }
+  .hooks-toggle-lbl { font-size: 13px; font-weight: 500; color: var(--tx); }
+  .hooks-toggle-sub { font-size: 11px; color: var(--tx3); margin-top:2px; }
+  .hooks-body { margin-top: 12px; display: none; }
+  .hooks-body.open { display: block; }
+  .hooks-hint { font-size: 11px; color: var(--tx3); margin-top: 6px; line-height: 1.5; }
+  .state-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 10px; font-weight: 500; padding: 2px 7px; border-radius: var(--r); border: 0.5px solid; }
+  .state-drafted { background: #EAF3DE; color: #27500A; border-color: #97C459; }
+  .state-approved { background: #E6F1FB; color: #042C53; border-color: #85B7EB; }
+  .state-posted { background: #EAF3DE; color: #27500A; border-color: #3B6D11; }
+  .state-actions { display: flex; gap: 5px; margin-top: 6px; flex-wrap: wrap; }
+  .state-btn { padding: 3px 9px; font-size: 11px; border-radius: var(--r); border: 0.5px solid var(--bd2); background: transparent; color: var(--tx2); cursor: pointer; font-family: inherit; transition: all .1s; }
+  .state-btn:hover { color: var(--tx); border-color: var(--bd2); }
+  .state-btn.approve { border-color: #85B7EB; color: #185FA5; }
+  .state-btn.approve:hover { background: #E6F1FB; }
+  .queue-item { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); padding: 14px 16px; margin-bottom: 10px; }
+  .queue-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; flex-wrap: wrap; }
+  .queue-date { font-size: 11px; color: var(--tx3); }
+  .queue-topic { font-size: 13px; color: var(--tx); font-weight: 500; margin-bottom: 6px; line-height: 1.4; }
+  .queue-preview { font-size: 12px; color: var(--tx2); line-height: 1.6; white-space: pre-wrap; border-left: 2px solid var(--bd); padding-left: 10px; margin-bottom: 8px; }
+  .queue-actions { display: flex; gap: 7px; flex-wrap: wrap; }
+  .perf-tag { display: inline-block; font-size: 10px; padding: 1px 6px; border-radius: 3px; font-weight: 500; }
+  .perf-high { background: #EAF3DE; color: #27500A; }
+  .perf-low { background: var(--mb); color: var(--mt); }
+  .perf-avg { background: var(--bg3); color: var(--tx3); }
+  .queue-edit-area { width: 100%; font-size: 13px; font-family: inherit; background: var(--bg2); border: 0.5px solid var(--bd); border-radius: var(--r); color: var(--tx); padding: 10px; line-height: 1.65; resize: vertical; min-height: 80px; transition: border-color .12s; }
+  .queue-edit-area:focus { border-color: var(--bd2); outline: none; }
+  .queue-schedule { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 0.5px solid var(--bd); }
+  .queue-schedule-field { display: flex; flex-direction: column; gap: 4px; }
+  .queue-schedule-field label { font-size: 11px; color: var(--tx3); margin-bottom: 0; }
+  .queue-schedule-field input { padding: 6px 8px; font-size: 12px; width: 100%; }
+  .platform-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; align-items: center; }
+  .platform-lbl { font-size: 11px; color: var(--tx3); margin-right: 2px; }
+  .plat-chip { padding: 4px 11px; font-size: 12px; border: 0.5px solid var(--bd2); border-radius: var(--r); cursor: pointer; color: var(--tx2); background: transparent; font-family: inherit; transition: all .1s; }
+  .plat-chip:hover { color: var(--tx); border-color: var(--bd2); }
+  .plat-chip.on { border-color: var(--mbd); background: var(--mb); color: var(--mt); font-weight: 500; }
+  .save-flash { font-size: 11px; color: #3B6D11; margin-left: 6px; opacity: 0; transition: opacity .2s; pointer-events: none; }
+  .save-flash.show { opacity: 1; }
+  .sched-summary { font-size: 11px; color: var(--tx3); margin-top: 4px; }
+  .sched-summary.set { color: #185FA5; font-weight: 500; }
+  .strategy-panel { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); overflow: hidden; margin-top: 16px; }
+  .strategy-hd { display: flex; align-items: center; justify-content: space-between; padding: 11px 16px; background: var(--bg2); border-bottom: 0.5px solid var(--bd); cursor: pointer; }
+  .strategy-hd-lbl { font-size: 13px; font-weight: 500; color: var(--tx); }
+  .strategy-hd-sub { font-size: 11px; color: var(--tx3); margin-top: 1px; }
+  .strategy-body { display: none; }
+  .strategy-body.open { display: block; }
+  .ins-set { border-bottom: 0.5px solid var(--bd); }
+  .ins-set:last-child { border-bottom: none; }
+  .ins-set-hd { display: flex; align-items: center; gap: 8px; padding: 10px 16px; background: var(--bg2); border-bottom: 0.5px solid var(--bd); }
+  .ins-set-period { font-size: 11px; font-weight: 500; color: var(--tx); }
+  .ins-set-date { font-size: 10px; color: var(--tx3); }
+  .ins-set-del { font-size: 11px; color: var(--tx3); background: transparent; border: none; cursor: pointer; margin-left: auto; padding: 2px 4px; font-family: inherit; }
+  .ins-set-del:hover { color: var(--m); }
+  .ins-bullet { display: flex; align-items: flex-start; gap: 8px; padding: 9px 16px; border-bottom: 0.5px solid var(--bd); }
+  .ins-bullet:last-child { border-bottom: none; }
+  .ins-bullet-toggle { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; cursor: pointer; accent-color: var(--m); }
+  .ins-bullet-text { flex: 1; font-size: 12px; color: var(--tx2); line-height: 1.55; }
+  .ins-bullet-text.inactive { color: var(--tx3); text-decoration: line-through; }
+  .ins-bullet-edit { font-size: 11px; color: var(--tx3); background: transparent; border: none; cursor: pointer; padding: 2px 4px; font-family: inherit; flex-shrink: 0; }
+  .ins-bullet-edit:hover { color: var(--m); }
+  .ins-bullet-del { font-size: 11px; color: var(--tx3); background: transparent; border: none; cursor: pointer; padding: 2px 4px; font-family: inherit; flex-shrink: 0; }
+  .ins-bullet-del:hover { color: var(--m); }
+  .ins-edit-field { width: 100%; font-size: 12px; font-family: inherit; background: var(--bg2); border: 0.5px solid var(--bd2); border-radius: var(--r); color: var(--tx); padding: 4px 7px; line-height: 1.55; resize: none; }
+  .ins-add-row { padding: 10px 16px; border-top: 0.5px solid var(--bd); }
+  .strategy-empty { padding: 16px; font-size: 12px; color: var(--tx3); text-align: center; line-height: 1.6; }
+  .sched-rationale { font-size: 11px; color: var(--tx3); line-height: 1.55; padding: 7px 10px; background: var(--bg2); border-radius: var(--r); border-left: 2px solid var(--mbd); margin-top: 5px; display: none; }
+  .sched-rationale.show { display: block; }
+  .suggest-btn { padding: 4px 11px; font-size: 11px; border: 0.5px solid var(--mbd); border-radius: var(--r); background: var(--mb); color: var(--mt); cursor: pointer; font-family: inherit; font-weight: 500; transition: opacity .1s; }
+  .suggest-btn:hover { opacity: .8; }
+  .suggest-btn:disabled { opacity: .4; cursor: not-allowed; }
+  /* ── CHAT LAYOUT ──────────────────────────────────────── */
+  .chat-layout { display: flex; gap: 14px; align-items: flex-start; }
+  .chat-main { flex: 1; min-width: 0; }
+  .ctx-sidebar { width: 280px; flex-shrink: 0; }
+  @media(max-width:700px){ .chat-layout{flex-direction:column;} .ctx-sidebar{width:100%;} }
+  /* ── CONTEXT PANEL ────────────────────────────────────── */
+  .ctx-panel { background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--rl); overflow: hidden; }
+  .ctx-panel-hd { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 0.5px solid var(--bd); background: var(--bg2); }
+  .ctx-panel-lbl { font-size: 12px; font-weight: 500; color: var(--tx); }
+  .ctx-add-btn { padding: 3px 9px; font-size: 11px; background: var(--m); color: #fff; border: none; border-radius: var(--r); cursor: pointer; font-family: inherit; }
+  .ctx-add-btn:hover { opacity: .85; }
+  .ctx-save-btn { padding: 3px 9px; font-size: 11px; background: transparent; color: var(--tx2); border: 0.5px solid var(--bd2); border-radius: var(--r); cursor: pointer; font-family: inherit; transition: all .12s; }
+  .ctx-save-btn:hover { color: var(--tx); border-color: var(--bd2); }
+  .ctx-save-btn.saved { color: #3B6D11; border-color: #97C459; background: #EAF3DE; }
+  .ctx-status-select { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: var(--r); cursor: pointer; white-space: nowrap; flex-shrink: 0; border: 0.5px solid; font-family: inherit; background: transparent; outline: none; width: auto; max-width: 68px; }
+  .ctx-status-select.public { background: #EAF3DE; color: #27500A; border-color: #97C459; }
+  .ctx-status-select.private { background: #FAEEDA; color: #412402; border-color: #EF9F27; }
+  .ctx-status-select option { background: var(--bg); color: var(--tx); font-weight: 400; }
+  .ctx-card { border-bottom: 0.5px solid var(--bd); }
+  .ctx-card:last-child { border-bottom: none; }
+  .ctx-card-hd { display: flex; align-items: center; gap: 6px; padding: 8px 12px; cursor: default; }
+  .ctx-title-input { flex: 1; font-size: 12px; font-family: inherit; background: transparent; border: none; color: var(--tx); outline: none; min-width: 0; padding: 2px 0; }
+  .ctx-title-input::placeholder { color: var(--tx3); }
+  .ctx-title-input:focus { border-bottom: 0.5px solid var(--bd2); }
+  .ctx-status { font-size: 10px; font-weight: 500; padding: 2px 6px; border-radius: var(--r); cursor: pointer; white-space: nowrap; flex-shrink: 0; transition: all .1s; border: 0.5px solid; }
+  .ctx-status.public { background: #EAF3DE; color: #27500A; border-color: #97C459; }
+  .ctx-status.private { background: #FAEEDA; color: #412402; border-color: #EF9F27; }
+  .ctx-status.archived { background: var(--bg3); color: var(--tx3); border-color: var(--bd2); }
+  .ctx-expand-btn { font-size: 11px; color: var(--tx3); background: transparent; border: none; cursor: pointer; padding: 2px 4px; line-height: 1; flex-shrink: 0; transition: transform .15s; }
+  .ctx-expand-btn.open { transform: rotate(180deg); }
+  .ctx-archive-btn { font-size: 10px; color: var(--tx3); background: transparent; border: none; cursor: pointer; padding: 2px; opacity: 0; transition: opacity .1s; }
+  .ctx-card-hd:hover .ctx-archive-btn { opacity: 1; }
+  .ctx-body { padding: 10px 12px; border-top: 0.5px solid var(--bd); background: var(--bg2); display: none; }
+  .ctx-body.open { display: block; }
+  .ctx-notes { width: 100%; font-size: 12px; font-family: inherit; background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--r); color: var(--tx); padding: 7px 9px; resize: vertical; min-height: 60px; line-height: 1.55; outline: none; transition: border-color .12s; }
+  .ctx-notes:focus { border-color: var(--bd2); }
+  .ctx-files { margin-top: 8px; }
+  .ctx-file-item { display: flex; align-items: center; gap: 6px; padding: 5px 8px; background: var(--bg); border: 0.5px solid var(--bd); border-radius: var(--r); margin-bottom: 4px; font-size: 11px; color: var(--tx2); }
+  .ctx-file-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ctx-file-del { background: transparent; border: none; color: var(--tx3); cursor: pointer; font-size: 11px; padding: 1px 3px; flex-shrink: 0; }
+  .ctx-file-del:hover { color: var(--m); }
+  .ctx-upload-row { display: flex; gap: 6px; margin-top: 6px; }
+  .ctx-upload-btn { padding: 4px 10px; font-size: 11px; background: transparent; border: 0.5px solid var(--bd2); border-radius: var(--r); color: var(--tx2); cursor: pointer; font-family: inherit; transition: all .1s; }
+  .ctx-upload-btn:hover { color: var(--tx); border-color: var(--bd2); }
+  .ctx-archive-section { border-top: 0.5px solid var(--bd); background: var(--bg3); }
+  .ctx-archive-hd { padding: 8px 12px; font-size: 10px; font-weight: 500; color: var(--tx3); text-transform: uppercase; letter-spacing: .5px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; }
+  .ctx-archive-list { display: none; }
+  .ctx-archive-list.open { display: block; }
+  .ctx-archive-item { display: flex; align-items: center; gap: 6px; padding: 7px 12px; border-top: 0.5px solid var(--bd); }
+  .ctx-archive-title { flex: 1; font-size: 11px; color: var(--tx3); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ctx-restore-btn { font-size: 10px; color: var(--tx3); background: transparent; border: 0.5px solid var(--bd2); border-radius: var(--r); padding: 2px 6px; cursor: pointer; font-family: inherit; }
+  .ctx-restore-btn:hover { color: var(--tx); }
+  .ctx-del-btn { font-size: 10px; color: var(--m); background: transparent; border: 0.5px solid var(--mbd); border-radius: var(--r); padding: 2px 6px; cursor: pointer; font-family: inherit; }
+  .ctx-del-btn:hover { background: var(--mb); }
+  .ctx-empty { padding: 14px 12px; font-size: 12px; color: var(--tx3); text-align: center; line-height: 1.6; }</style>
+</head>
+<body>
+
+<div id="setup-screen" class="hidden">
+  <div class="setup-card">
+    <div class="setup-logo">2MR Labs</div>
+    <div class="setup-title">Enter your Anthropic API key</div>
+    <div class="setup-desc">
+      This app calls the Claude API directly from your browser. Your key is stored locally and never sent anywhere except Anthropic.<br><br>
+      Get a key at <a href="https://console.anthropic.com/settings/keys" target="_blank">console.anthropic.com</a>. You'll need to add a small credit balance — a month of content generation costs under $1.
+    </div>
+    <div class="setup-input-row">
+      <input type="password" id="key-input" placeholder="sk-ant-…" style="flex:1" onkeydown="if(event.key==='Enter')saveKey()">
+      <button class="btn-p" onclick="saveKey()">Save</button>
+    </div>
+    <div class="setup-note">Your key is saved in your browser's local storage. It stays on your device.</div>
+  </div>
+</div>
+
+<div id="shell">
+  <div class="brand">
+    <span class="bn">2MR Labs</span>
+    <span class="bt">Content calendar</span>
+    <span style="font-size:10px;color:var(--tx3);margin-left:auto;padding:2px 7px;border:0.5px solid var(--bd);border-radius:var(--r)">0.30</span>
+    <button class="key-badge" onclick="promptKey()" title="Change API key"><div class="key-dot"></div>API key set</button>
+  </div>
+  <div class="tabs">
+    <button class="tab on" onclick="showTab('calendar',this)">Calendar</button>
+    <button class="tab" onclick="showTab('queue',this)">Queue <span id="queue-count" style="display:none;background:var(--m);color:#fff;border-radius:10px;padding:0 5px;font-size:10px;margin-left:3px"></span></button>
+    <button class="tab" onclick="showTab('create',this)">Create</button>
+    <button class="tab" onclick="showTab('analytics',this)">Analytics</button>
+    <button class="tab" onclick="showTab('history',this)">History</button>
+    <button class="tab" onclick="showTab('chat',this)">Chat</button>
+  </div>
+
+  <div id="sec-calendar" class="sec on">
+    <div class="nav-row">
+      <div class="nav-info">
+        <div class="nav-lbl" id="nav-lbl"></div>
+        <div class="nav-sub" id="nav-sub"></div>
+      </div>
+      <div class="nav-btns">
+        <button class="btn-g" onclick="shiftWeeks(-1)">&#8592; Back</button>
+        <button class="btn-g" onclick="shiftWeeks(0)">This week</button>
+        <button class="btn-g" onclick="shiftWeeks(1)">Next &#8594;</button>
+        <button class="btn-p" id="plan-btn" onclick="generatePlan()" style="font-size:12px;padding:6px 14px">Plan 4 weeks</button>
+      </div>
+    </div>
+    <div id="plan-status" style="font-size:12px;color:var(--tx3);margin-bottom:10px;min-height:18px"></div>
+    <div id="insights-badge" style="display:none;font-size:11px;background:var(--c-lf-bg);color:var(--c-lf-t);border:0.5px solid var(--c-lf-bd);border-radius:var(--r);padding:5px 10px;margin-bottom:10px;align-items:center;justify-content:space-between">
+      <span>&#128200; Analytics insights active — influencing content generation</span>
+      <button onclick="clearInsights()" style="font-size:10px;background:transparent;border:none;color:var(--c-lf-t);cursor:pointer;padding:0 0 0 8px;opacity:.7">Clear</button>
+    </div>
+
+    <div class="hooks-panel">
+      <div class="hooks-toggle" onclick="toggleHooks()">
+        <div>
+          <div class="hooks-toggle-lbl">&#128240; News hooks</div>
+          <div class="hooks-toggle-sub" id="hooks-sub">Paste headlines or topics to ground the plan in current events</div>
+        </div>
+        <span id="hooks-arrow" style="font-size:12px;color:var(--tx3)">&#9660;</span>
+      </div>
+      <div class="hooks-body" id="hooks-body">
+        <textarea id="hooks-input" rows="3" placeholder="Paste 3–5 current headlines or topics relevant to this period. These feed directly into Plan 4 weeks and individual drafts."></textarea>
+        <div class="hooks-hint">Updated hooks are used by Plan 4 weeks and individual slot generation. The more specific, the better the signal posts.</div>
+      </div>
+    </div>
+
+    <div class="leg">
+      <div class="leg-i"><div class="leg-d" style="background:var(--c-sig)"></div>Tuesday — signal</div>
+      <div class="leg-i"><div class="leg-d" style="background:var(--c-alt)"></div>Thursday — capability / founder</div>
+      <div class="leg-i"><div class="leg-d" style="background:var(--c-lf)"></div>Saturday — long-form</div>
+      <div class="leg-i"><div class="leg-d" style="background:#97C459"></div>Drafted</div>
+      <div class="leg-i"><div class="leg-d" style="background:#85B7EB"></div>Approved</div>
+    </div>
+    <div id="cal-weeks"></div>
+  </div>
+
+  <div id="sec-create" class="sec">
+    <div class="card">
+      <div class="fg">
+        <label>Post type</label>
+        <div class="tg">
+          <button class="ch on" onclick="setV('ct','signal',this)">Signal post</button>
+          <button class="ch" onclick="setV('ct','capability',this)">Capability post</button>
+          <button class="ch" onclick="setV('ct','founder',this)">Founder voice</button>
+          <button class="ch" onclick="setV('ct','longform',this)">Long-form</button>
+        </div>
+      </div>
+      <div class="fg">
+        <label>Format</label>
+        <div class="tg">
+          <button class="ch on" onclick="setV('fmt','x-post',this)">X post</button>
+          <button class="ch" onclick="setV('fmt','x-thread',this)">X thread</button>
+          <button class="ch" onclick="setV('fmt','linkedin',this)">LinkedIn</button>
+          <button class="ch" onclick="setV('fmt','medium',this)">Medium</button>
+        </div>
+      </div>
+      <div><label>Topic / angle / news hook</label>
+        <textarea id="cr-ctx" placeholder="Describe the topic, angle, or news hook for this post…"></textarea>
+      </div>
+    </div>
+    <button class="btn-p" id="cr-btn" onclick="genCreate()">Generate</button>
+    <div id="cr-out"></div>
+  </div>
+
+  <div id="sec-analytics" class="sec">
+    <div id="ax-upload">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px">
+        <div class="drop-zone" id="drop-zone-x" onclick="document.getElementById('csv-input-x').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="event.preventDefault();this.classList.remove('drag');handleXFile(event.dataTransfer.files[0])">
+          <input type="file" id="csv-input-x" accept=".csv" onchange="handleXFile(this.files[0])">
+          <div style="font-size:13px;font-weight:500;margin-bottom:6px">𝕏 Analytics</div>
+          <div class="drop-sub">
+            Download from <a class="drop-link" href="https://analytics.twitter.com" target="_blank">analytics.twitter.com</a>
+          </div>
+          <div id="x-upload-status" style="font-size:11px;color:#3B6D11;margin-top:6px;display:none"></div>
+        </div>
+        <div class="drop-zone" id="drop-zone-li" onclick="document.getElementById('csv-input-li').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="event.preventDefault();this.classList.remove('drag');handleLiFile(event.dataTransfer.files[0])">
+          <input type="file" id="csv-input-li" accept=".csv,.xls,.xlsx" onchange="handleLiFile(this.files[0])">
+          <div style="font-size:13px;font-weight:500;margin-bottom:6px">LinkedIn Analytics</div>
+          <div class="drop-sub">
+            Download from <a class="drop-link" href="https://www.linkedin.com/analytics/creator/" target="_blank">linkedin.com/analytics</a>
+          </div>
+          <div id="li-upload-status" style="font-size:11px;color:#3B6D11;margin-top:6px;display:none"></div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:10px">
+        <button class="btn-p" id="ax-start-btn" onclick="startAnalysis()" disabled style="opacity:.38">Analyse &amp; recommend</button>
+        <div style="font-size:11px;color:var(--tx3);margin-top:6px">Upload at least one platform to analyse</div>
+      </div>
+    </div>
+    <div id="ax-data" style="display:none">
+      <div style="display:flex;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
+        <span class="period-badge" id="ax-period"></span>
+        <button class="reset-btn" onclick="resetAnalytics()">Upload new files</button>
+        <button class="btn-p btn-sm" id="ax-analyse-btn" onclick="runAnalysis()" style="margin-left:auto;padding:6px 14px;font-size:12px">Analyse &amp; recommend</button>
+      </div>
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--tx3);margin-bottom:8px">𝕏 Performance</div>
+      <div class="metrics-grid" id="ax-metrics"></div>
+      <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+        <div style="padding:12px 16px;border-bottom:0.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between">
+          <span style="font-size:12px;font-weight:500">Top X posts by impressions</span>
+          <span style="font-size:11px;color:var(--tx3)" id="ax-post-count"></span>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="posts-table" id="ax-table"></table>
+        </div>
+      </div>
+      <div id="li-data-section" style="display:none">
+        <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--tx3);margin-bottom:8px">LinkedIn Performance</div>
+        <div class="metrics-grid" id="li-metrics"></div>
+        <div class="card" style="padding:0;overflow:hidden;margin-bottom:12px">
+          <div style="padding:12px 16px;border-bottom:0.5px solid var(--bd);display:flex;align-items:center;justify-content:space-between">
+            <span style="font-size:12px;font-weight:500">Top LinkedIn posts by impressions</span>
+            <span style="font-size:11px;color:var(--tx3)" id="li-post-count"></span>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="posts-table" id="li-table"></table>
+          </div>
+        </div>
+      </div>
+      <div id="ax-rec"></div>
+      <div id="ax-apply-row" style="display:none;margin-top:12px">
+        <button class="btn-p" id="ax-apply-btn" onclick="applyInsights()" style="font-size:12px;padding:7px 16px">Apply to content strategy</button>
+        <span style="font-size:11px;color:var(--tx3);margin-left:10px">Saves key patterns — influences calendar planning, drafts, and chat</span>
+      </div>
+    </div>
+
+    <div class="strategy-panel" id="strategy-panel" style="margin-top:16px">
+      <div class="strategy-hd" onclick="toggleStrategyPanel()">
+        <div>
+          <div class="strategy-hd-lbl">Content strategy</div>
+          <div class="strategy-hd-sub" id="strategy-hd-sub">No insights applied yet</div>
+        </div>
+        <span id="strategy-arrow" style="font-size:11px;color:var(--tx3)">▼</span>
+      </div>
+      <div class="strategy-body" id="strategy-body">
+        <div id="strategy-list"></div>
+        <div class="ins-add-row">
+          <div style="display:flex;gap:7px">
+            <input type="text" id="ins-manual-input" placeholder="Add a manual insight…" style="flex:1;font-size:12px" onkeydown="if(event.key==='Enter')addManualInsight()">
+            <button class="btn-g" onclick="addManualInsight()" style="font-size:12px;padding:5px 12px">Add</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="sec-queue" class="sec">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-size:14px;font-weight:500">Publish queue</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:2px">Drafted and approved content ready to publish</div>
+      </div>
+    </div>
+    <div id="queue-drafted" style="margin-bottom:20px">
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--tx3);margin-bottom:8px">Needs review</div>
+      <div id="queue-drafted-list"></div>
+    </div>
+    <div id="queue-approved">
+      <div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--tx3);margin-bottom:8px">Approved — ready to post</div>
+      <div id="queue-approved-list"></div>
+    </div>
+  </div>
+
+  <div id="sec-history" class="sec">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+      <div>
+        <div style="font-size:14px;font-weight:500">Post history</div>
+        <div style="font-size:11px;color:var(--tx3);margin-top:2px">Posts you've marked as published. Used to avoid repetition when generating.</div>
+      </div>
+      <button class="btn-g" onclick="if(confirm('Clear all post history?'))clearHistory()">Clear all</button>
+    </div>
+    <div id="history-list"></div>
+  </div>
+
+  <div id="sec-chat" class="sec">
+    <div class="chat-layout">
+      <div class="chat-main">
+        <div class="card">
+          <div class="cmsg" id="chat-msgs">
+            <div class="msg a">Ready. What do you need? Context from the sidebar will be used automatically — add company updates there to keep generations current.</div>
+          </div>
+          <div class="cchips" id="chat-chips-box">
+            <button class="cchip" onclick="setChip(this)">Signal post on a recent infrastructure attack</button>
+            <button class="cchip" onclick="setChip(this)">Giants OS sensor fusion capability post</button>
+            <button class="cchip" onclick="setChip(this)">Founder statement from Lien — why he joined 2MR</button>
+            <button class="cchip" onclick="setChip(this)">Five signal post ideas for this week</button>
+            <button class="cchip" onclick="setChip(this)">What should we post about this week?</button>
+          </div>
+          <div class="cir">
+            <textarea id="chat-in" placeholder="What do you need?" rows="2" style="flex:1" onkeydown="chatKey(event)"></textarea>
+            <button class="btn-p" id="chat-btn" onclick="sendChat()">Send</button>
+          </div>
+        </div>
+      </div>
+      <div class="ctx-sidebar">
+        <div class="ctx-panel">
+          <div class="ctx-panel-hd">
+            <span class="ctx-panel-lbl">Company context</span>
+            <div style="display:flex;gap:6px">
+              <button class="ctx-save-btn" id="ctx-save-btn" onclick="saveAndApplyCtx()" title="Save and refresh chat recommendations">Save &amp; apply</button>
+              <button class="ctx-add-btn" onclick="addCtxCard()">+ Add</button>
+            </div>
+          </div>
+          <div id="ctx-active-list"></div>
+          <div class="ctx-archive-section" id="ctx-archive-section" style="display:none">
+            <div class="ctx-archive-hd" onclick="toggleArchiveList()">
+              <span>Archived</span><span id="ctx-archive-arrow">▼</span>
+            </div>
+            <div class="ctx-archive-list" id="ctx-archive-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const BRIEF=`You are the autonomous content system for 2MR Labs.
+
+ROLE
+Generate relevant topics and produce high-quality content across Medium, LinkedIn, X (posts, threads, long-form articles), and Telegram. Produce both industry-focused content (builds credibility through analysis) and company-focused content (communicates positioning and capability without promotion).
+
+COMPANY
+2MR Labs (Tomorrow Labs). Singapore. Founded 2022. Profitable FY2025. AI-driven intelligence systems for governments, defence ministries, and sovereign institutions. Pre-Series A $25M. NASDAQ target Q4 2026.
+
+REPOSITIONING NARRATIVE
+Not a pivot — a recognition. The same AI systems built for high-stakes complex environments. Geopolitical instability clarified the mission. Structural (not cyclical) instability. Critical infrastructure is a target. Nations must ask: who builds the AI, who controls it, whose interests does it serve. Governments that move now to build sovereign AI will enter the next decade with a structural advantage.
+
+GIANTS OS
+AI-driven defence platform. Compresses decision cycles from minutes to seconds. Six parallel specialist agents: Kinetix (kinetic/threat/weapon-target pairing), Daemon (cyber/SIEM/kill chain across 7 stages), Vibe (OSINT — highest prompt injection risk, structural output limits), Planner (ROE compliance/geofence/mission planning), Quartermaster (logistics/asset reservation), BDA (battle damage assessment pre/post-strike). Multi-sensor fusion: radar, EO, SAR, SIGINT, ADS-B, Link 16, acoustic — Extended Kalman Filter and Hungarian algorithm for real-time track assignment. Threat scoring 0–100 across 7 intelligence sources; above 80 = Critical. 4-stage safety pipeline: Detection (50+ injection patterns, ROE bypass blocking, strike order injection blocking), Validation, Policy, Leak Scan. Zero-trust: Open/Secret/Top Secret data model, upward-only data flow, oracle-attack elimination. Intel SGX hardware enclaves — keys sealed to binary measurement, root-level access cannot extract them. Single static binary — same build runs air-gapped edge, SATCOM tactical, or enterprise. No foreign cloud. Human-in-loop enforced architecturally. Demo: giants-defense.vercel.app
+
+TEAM
+Arthur Lin — CEO. Singapore Armed Forces Commando Formation — US Ranger School graduate, commanded airborne special operations unit. Special Project Officer — created Singapore's first 4G Special Operations Task Force, founded Commando Training Institute. Afghanistan 2010 — Military Intelligence Officer and Security Commander. CEO/Founder: Action X, Runner's Planet, Zombie Run. Leads 2MR Labs' sovereign AI and digital asset infrastructure development. arthur.lin@2mrlabs.com
+Lien Choong Luen — Strategic Consultant. SAF Senior Lieutenant Colonel, Commando Formation, 1,000+ personnel, Best Combat Unit. US Army Ranger School. US Marines Officer Course. UN East Timor peacekeeping — organised Timor-Leste's first presidential election, 2002. 6 years Assistant Director, Singapore Ministry of Defence Future Systems and Technology Directorate. UC Berkeley BA Applied Mathematics — Chancellor's Scholar. Cambridge MA Pure Mathematics. McKinsey Center for Government 5 years — led Sierra Leone post-Ebola reconstruction. Gojek Singapore General Manager from February 2019. Everest 2010. K2 2014. Gobi March 250km/50°C. Amazon ultramarathon 250km. North Pole trek. Gold Asian Masters Athletics 800m 2016. Pattern: deliberate, consistent orientation toward the hardest available problem.
+Rayna Ren — AI Lead. Engineering at Intel and SAP. Co-founded Wearapay ($10M raised, production scale). AION Network, FBG Capital. Co-founded sating.io. Built the multi-agent architecture behind both Giants Protocol and Giants OS — the same architecture in two completely different high-stakes domains.
+
+AUDIENCE (priority order)
+1. Government stakeholders — MENA and Southeast Asia defence ministries, national security agencies
+2. Investors — pre-Series A, strategic capital partners
+3. Infrastructure and energy operators
+4. Technology ecosystem — credibility, talent, industry presence
+
+COMPETITIVE POSITIONING
+2MR Labs is a neutral, Singapore-based sovereign AI company. This neutrality is a structural feature — not a critique of other platforms. Never frame content as opposition to US companies, Western platforms, or competing vendors. Do not name competitors in generated content. Do not imply that working with 2MR Labs means not working with others. The positioning is: 2MR Labs serves governments that require sovereign infrastructure and operational independence — the emphasis is always on what 2MR Labs offers, not on what others lack.
+
+CONTENT BOUNDARIES
+Never generate content that: names or implies criticism of specific companies or platforms, takes sides in geopolitical conflicts, implies political alignment or opposition, or could be read as adversarial toward any government, alliance, or technology ecosystem. Maintain the tone of a serious, neutral technology organisation — informative and credible, never polemical.
+
+TOPIC GENERATION
+Generate a mix of industry topics and company topics.
+Industry: AI in complex environments, infrastructure intelligence, operational systems, geopolitical instability and its effect on sovereign technology decisions.
+Company: platform capabilities, system architecture, founder perspectives, company positioning.
+Ensure topics are distinct, non-repetitive, specific, and each has a clear angle.
+
+CONTENT CREATION
+Demonstrate understanding of complex systems. Provide meaningful insight. Maintain a controlled and professional tone. Avoid generic or surface-level statements.
+
+COMPANY CONTENT RULES
+Avoid promotional language. Focus on explanation rather than claims. Communicate capability through clarity. Maintain an institutional tone. Content should feel informative and credible, not marketing-driven.
+
+PRIVATE CONTEXT HANDLING
+When context is marked PRIVATE: acknowledge existence and strategic significance, never reveal partner names, terms, timelines, counterparties, or operational details. Write obliquely — "a recently signed government mandate", "an active deployment in the region", "a new strategic partnership in the Gulf". Tease capability and significance without specifics. This is standard practice for technology companies operating in sensitive government markets.
+
+TONE AND LANGUAGE
+Natural, human, professional. Write directly and clearly. No artificial transitions. No formulaic phrasing. No "no, but…" constructions. The writing should feel like it comes from a serious organisation that has nothing to prove.
+Reference cadence from published content:
+"The AI capabilities driving 2MR Labs into sovereign defence were not built for defence. They were built to the standard that defence demands."
+"That is not a feature. It is a design prerequisite."
+"The technical foundations were already aligned. The mission gave them a direction."
+"Tomorrow, for us, has always been a direction — not a destination. The world has made it a mission."
+
+PLATFORM ADAPTATION
+Medium: structured, analytical or narrative, 800–1100 words.
+LinkedIn: professional insight, 150–300 words, declarative opener, no emoji, no filler.
+X posts: max 280 chars, declarative, no hashtags, return only post text.
+X threads: 5–7 tweets separated by "---", max 280 chars each, standalone hook first, no tweet numbers.
+X articles: 600–900 words, markdown headers (##), no hashtags.
+Telegram: concise, timely, observational.
+
+CREDIBILITY AND SAFETY
+Do not fabricate facts. Avoid speculation. Remain politically neutral. Avoid sensitive or operational details.
+
+SELF-CRITIQUE (internal — do not display)
+Before final output evaluate: is the content generic? Does it provide real insight? Is the tone credible? Refine before output if needed.
+
+OUTPUT DISCIPLINE
+Produce only the requested output. No explanations, preamble, or labels unless asked.`;
+const ANALYTICS_BRIEF=`You are the analytics system for 2MR Labs' content workflow.
+
+ROLE
+Analyse performance data from X (CSV) and LinkedIn to evaluate content effectiveness. Identify patterns in engagement, structure, tone, and topic selection. Produce precise, actionable recommendations to improve content quality and strategic positioning over time. Prioritise credibility, signal quality, and relevance to institutional audiences.
+
+AUDIENCE CONTEXT
+2MR Labs targets four audiences in priority order:
+1. Government stakeholders — MENA and Southeast Asia defence ministries, national security agencies
+2. Investors — pre-Series A, strategic capital partners
+3. Infrastructure and energy operators
+4. Technology ecosystem — credibility, talent, industry presence
+This is a niche institutional audience. Evaluate all engagement figures against this baseline, not general social media benchmarks. A smaller number of high-quality engagements from qualified institutional accounts outweighs large volumes of passive interaction. Do not flag low absolute numbers as underperformance without contextual justification.
+
+CONTENT TYPE AWARENESS
+2MR Labs publishes five content types. Compare performance within type, not across types:
+Signal post: short X-first, reactive, geopolitical or AI news framed through sovereignty lens
+Capability post: Giants OS architecture, specific design decisions, technical depth
+Founder voice: Lien Choong Luen or Arthur Lin personal position, specific experience
+Long-form: Medium article or X article, one argued thesis, 600–1100 words
+Industry analysis: trend, policy signal, competitor move
+
+CHANNEL STRATEGY CONTEXT
+X is the primary channel — first publish, drives traffic to long-form. LinkedIn is secondary — reformatted for professional depth. Underperformance on X carries more strategic weight. LinkedIn engagement from institutional or investor accounts is higher-signal than general professional engagement.
+
+EVALUATION APPROACH
+Analyse engagement quality not just volume, clarity and specificity of content, topic relevance to target audiences, format effectiveness. Do not optimise for virality. Optimise for credibility, insight, and audience relevance.
+
+PERFORMANCE INTERPRETATION
+High impressions with low engagement → weak framing or unclear value proposition.
+Strong engagement on niche content → high relevance to target audience, positive signal.
+Consistent underperformance → structural or tonal issue.
+Low absolute numbers with high engagement rate → likely reaching the right audience, do not flag as underperformance.
+
+POST-LEVEL INSIGHT
+Reference specific posts to support conclusions only when they provide genuine insight. Example: "Post on [date] discussing infrastructure monitoring outperformed others due to clear operational framing — 3× engagement rate versus the period average."
+
+STRATEGIC RECOMMENDATIONS
+Provide recommendations in four categories:
+1. Writing — tone, clarity, structural improvements
+2. Topics — areas to expand or reduce
+3. Platform Strategy — format per platform, distribution
+4. Posting Strategy — frequency, content mix, timing
+Recommendations must be specific, actionable, grounded in data. Avoid generic advice.
+
+ON CONTENT DIRECTION
+Do not rewrite or produce final content. You may suggest structural approaches, angles, or framing directions to illustrate recommendations.
+
+OUTPUT FORMAT
+Structure outputs as:
+1. Performance Summary
+2. Platform Breakdown
+3. Pattern Insights
+4. Strategic Recommendations
+5. Content Strategy Update (compact — 3–5 bullet points summarising what the writing system should do differently, formatted for direct injection into content generation. Label each bullet: [FORMAT], [TOPIC], [TONE], [AVOID], or [PRIORITISE].)
+
+Do not include content outside this structure unless asked.`;
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const FULL_MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+
+const PILL_MAP={signal:'pill-sig',capability:'pill-alt',founder:'pill-alt',longform:'pill-lf'};
+const LABEL_MAP={signal:'Signal post',capability:'Capability post',founder:'Founder voice',longform:'Long-form drop'};
+const CH_MAP={signal:'X only',capability:'X + LinkedIn',founder:'X + LinkedIn',longform:'X thread / article + Medium + LinkedIn'};
+const FMT_MAP={signal:['x-post'],capability:['x-post','x-thread','linkedin'],founder:['x-post','x-thread','linkedin'],longform:['x-thread','x-article','medium','linkedin']};
+
+const S={ct:'signal',fmt:'x-post',chatH:[],clips:{},gFmt:{},weekOffset:0,topics:{}};
+
+function getMonday(d){const c=new Date(d);const day=c.getDay();c.setDate(c.getDate()-(day===0?6:day-1));c.setHours(0,0,0,0);return c;}
+function thisMonday(){return getMonday(new Date());}
+function wKey(mon){return`${mon.getFullYear()}-${mon.getMonth()}-${mon.getDate()}`;}
+function thuType(absWeek){return absWeek%2===0?{type:'capability'}:{type:'founder'};}
+
+function planCacheKey(){
+  const base=thisMonday();
+  const start=new Date(base);start.setDate(start.getDate()+S.weekOffset*7);
+  return`plan-${start.getFullYear()}-${start.getMonth()}-${start.getDate()}`;
+}
+
+function loadPlanCache(){
+  try{const c=localStorage.getItem(planCacheKey());return c?JSON.parse(c):null;}catch{return null;}
+}
+
+function savePlanCache(slots){
+  localStorage.setItem(planCacheKey(),JSON.stringify({slots,ts:Date.now()}));
+}
+
+function setPlanStatus(msg,loading){
+  const el=document.getElementById('plan-status');if(!el)return;
+  el.innerHTML=loading?`<div class="ld" style="padding:0"><div class="dots"><span></span><span></span><span></span></div><span>${msg}</span></div>`:(msg?`<span style="color:var(--tx3)">${msg}</span>`:'');
+}
+
+async function generatePlan(force){
+  if(!getKey()){alert('Add your API key first.');return;}
+  const btn=document.getElementById('plan-btn');
+  btn.disabled=true;btn.textContent='Planning…';
+  setPlanStatus('Generating 4-week content plan…',true);
+
+  // Build context
+  const hist=loadHistory().slice(-20).reverse();
+  const histLines=hist.length?hist.map(p=>`- [${p.date}] ${p.type}: "${p.topic}"`).join('\n'):'None yet.';
+
+  // Analytics performance context
+  let axContext='';
+  if(typeof AX!=='undefined'&&AX){
+    const perf=getPerformanceInsights();
+    const top3=AX.rows.slice(0,3).map(r=>`"${r.text.slice(0,80)}" (${fmt(r.impressions)} imp, ${fmtPct(r.rate)} eng)`).join('\n');
+    axContext=`\nX ANALYTICS (${AX.period}) — bias suggestions toward what's working:\nAvg engagement: ${fmtPct(AX.avgRate)}\nTop posts:\n${top3}${perf?'\nPerformance patterns: '+perf:''}`;
+  }
+
+  // News hooks
+  const hooks=getHooks();
+  const hooksCtx=hooks?`\nCURRENT NEWS HOOKS — prioritise these for signal posts and tie other content to these themes where natural:\n${hooks}`:'';
+
+  // Sidebar context
+  const ctxBlock=buildContextBlock();
+  const ctxCtx=ctxBlock?`\nCOMPANY CONTEXT FROM SIDEBAR — use public items freely, reference private items obliquely:\n${ctxBlock}`:'';
+  const insBlock=getInsightsBlock();
+
+  // Build slot list for this 4-week window
+  const base=thisMonday();
+  const start=new Date(base);start.setDate(start.getDate()+S.weekOffset*7);
+  const today=new Date();today.setHours(0,0,0,0);
+  const slots=[];
+  for(let w=0;w<4;w++){
+    const mon=new Date(start);mon.setDate(mon.getDate()+w*7);
+    const tue=new Date(mon);tue.setDate(tue.getDate()+1);
+    const thu=new Date(mon);thu.setDate(thu.getDate()+3);
+    const sat=new Date(mon);sat.setDate(sat.getDate()+5);
+    const mk=wKey(mon);
+    const thuD=thuType(S.weekOffset+w);
+    const weekRows=[
+      {sk:`${mk}-tue`,date:tue,type:'signal'},
+      {sk:`${mk}-thu`,date:thu,type:thuD.type},
+      {sk:`${mk}-sat`,date:sat,type:'longform'}
+    ];
+    weekRows.forEach(r=>{
+      const isPosted=!!getPosted(r.sk);
+      const hasCustom=S.topics[r.sk]!==undefined;
+      slots.push({...r,isPast:r.date<today,isPosted,hasCustom,existingTopic:S.topics[r.sk]||''});
+    });
+  }
+
+  // Only generate topics for unposted, non-custom, non-past slots
+  const toGenerate=slots.filter(s=>!s.isPosted&&!s.isPast&&!s.hasCustom);
+  const locked=slots.filter(s=>s.hasCustom&&!s.isPosted).map(s=>`${s.type} on ${s.date.toISOString().slice(0,10)}: "${s.existingTopic}"`);
+
+  if(!toGenerate.length){
+    setPlanStatus('All slots are already planned or posted.');
+    btn.disabled=false;btn.textContent='Plan 4 weeks';
+    return;
+  }
+
+  const dateRange=`${start.toISOString().slice(0,10)} to ${new Date(start.getTime()+27*24*3600*1000).toISOString().slice(0,10)}`;
+  const slotDescs=toGenerate.map((s,i)=>`${i+1}. ${s.date.toISOString().slice(0,10)} (${s.type})`).join('\n');
+
+  const prompt=`You are planning 2MR Labs' content calendar for ${dateRange}. Today is ${today.toISOString().slice(0,10)}.
+
+Generate specific, timely topic suggestions for each slot below. Think about what will be relevant and newsworthy in this time period — geopolitical developments, AI industry news, defence technology trends — and tie each topic to 2MR Labs' positioning as a neutral sovereign AI company.
+
+SLOTS TO PLAN:
+${slotDescs}
+
+${locked.length?`ALREADY PLANNED THIS PERIOD (do not overlap):\n${locked.join('\n')}\n`:''}
+RECENTLY PUBLISHED (avoid repeating these angles):
+${histLines}
+${axContext}
+${hooksCtx}
+${ctxCtx}
+${insBlock}
+
+Rules:
+- Signal posts: tie to a likely or ongoing world event/trend in this timeframe. Be specific about the angle.
+- Capability posts: highlight a specific Giants OS feature or architectural decision. Rotate through different capabilities.
+- Founder posts: draw on a specific personal experience from Lien or Arthur. No repeats.
+- Long-form: one strong, arguable thesis. Different each time.
+- Ensure variety across the 4 weeks — no two posts should cover the same angle.
+- CRITICAL: recently published topics listed above are fully exhausted. Do not revisit the same event, rephrase the same argument, or approach the same angle from a different direction. Each slot must cover genuinely new ground.
+
+Return ONLY a valid JSON array with exactly ${toGenerate.length} objects, each with:
+- "sk": the slot key (copy exactly from the slot list above using the date, e.g. use the index to match)
+- "type": the post type
+- "topic": a single specific sentence describing the angle (not generic, not vague)
+
+No markdown, no explanation. JSON array only.`;
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:1200,system:BRIEF,messages:[{role:'user',content:prompt}]})
+    });
+    const d=await r.json();
+    const raw=(d.content?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const items=JSON.parse(raw);
+    // Map by index since sk format in prompt uses index
+    items.forEach((item,i)=>{
+      if(i>=toGenerate.length)return;
+      const sk=toGenerate[i].sk;
+      if(!S.topics[sk]){// only set if not manually edited
+        S.topics[sk]=item.topic||item.suggestion||'';
+      }
+    });
+    savePlanCache(S.topics);
+    setPlanStatus(`Plan generated for ${toGenerate.length} slots — click any topic to edit`);
+    renderCal();
+  }catch(e){
+    setPlanStatus('Planning failed: '+e.message);
+  }
+  btn.disabled=false;btn.textContent='Plan 4 weeks';
+}
+
+function shiftWeeks(n){
+  S.weekOffset=n===0?0:S.weekOffset+n;
+  if(S.weekOffset<0)S.weekOffset=0;
+  renderCal();
+  if(n!==0)setPlanStatus('Hit "Plan 4 weeks" to generate topics for this period');
+}
+
+async function replanWeek(mk,absW){
+  if(!getKey()){alert('Add your API key first.');return;}
+  const btn=document.getElementById('rp-btn-'+mk);
+  if(btn){btn.disabled=true;btn.textContent='Planning…';}
+
+  const thuD=thuType(absW);
+  const allSlots=[
+    {sk:`${mk}-tue`,type:'signal'},
+    {sk:`${mk}-thu`,type:thuD.type},
+    {sk:`${mk}-sat`,type:'longform'}
+  ];
+
+  const drafts=loadDrafts();
+  const today=new Date();today.setHours(0,0,0,0);
+
+  // Locked = posted or has a saved draft
+  const toReplan=allSlots.filter(s=>{
+    if(getPosted(s.sk))return false;       // posted — keep
+    if(drafts[s.sk])return false;          // has draft — keep
+    return true;                           // free to replan
+  });
+
+  const locked=allSlots
+    .filter(s=>getPosted(s.sk)||drafts[s.sk])
+    .map(s=>{
+      const ph=getPosted(s.sk);
+      const topic=ph?ph.topic:S.topics[s.sk]||'';
+      return`${s.type}: "${topic}"`;
+    });
+
+  if(!toReplan.length){
+    setPlanStatus('All slots this week are drafted or posted — nothing to replan.');
+    if(btn){btn.disabled=false;btn.textContent='Replan';}
+    return;
+  }
+
+  // Clear existing topics for slots being replanned
+  toReplan.forEach(s=>delete S.topics[s.sk]);
+  renderCal();
+
+  const hist=loadHistory().slice(-15).reverse();
+  const histLines=hist.length?hist.map(p=>`- [${p.date}] ${p.type}: "${p.topic}"`).join('\n'):'None yet.';
+  const hooks=getHooks();
+  const ctxBlock=buildContextBlock();
+  const slotDescs=toReplan.map((s,i)=>`${i+1}. ${s.type}`).join('\n');
+  const today2=new Date();
+
+  const prompt='You are replanning specific slots in 2MR Labs\' content calendar for the week starting '+mk+'.\n\nSLOTS TO REPLAN:\n'+slotDescs+'\n\n'+(locked.length?'KEEP THESE (already drafted or posted this week — do not overlap):\n'+locked.join('\n')+'\n\n':'')+'RECENTLY PUBLISHED (avoid repeating):\n'+histLines+'\n'+(hooks?'\nNEWS HOOKS:\n'+hooks+'\n':'')+(ctxBlock?ctxBlock:'')+(getInsightsBlock()?'\n'+getInsightsBlock():'')+'\n\nGenerate fresh, specific topics. Return ONLY a JSON array with exactly '+toReplan.length+' objects, each: {"type":"...","topic":"one specific sentence"}. No markdown.';
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:600,system:BRIEF,messages:[{role:'user',content:prompt}]})
+    });
+    const d=await r.json();
+    const raw=(d.content?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const items=JSON.parse(raw);
+    items.forEach((item,i)=>{
+      if(i>=toReplan.length)return;
+      S.topics[toReplan[i].sk]=item.topic||'';
+    });
+    renderCal();
+    setPlanStatus('Week replanned — '+toReplan.length+' slot'+(toReplan.length>1?'s':'')+' updated');
+  }catch(e){
+    setPlanStatus('Replan failed: '+e.message);
+  }
+  if(btn){btn.disabled=false;btn.textContent='Replan';}
+}
+
+function renderCal(){
+  const start=thisMonday();
+  start.setDate(start.getDate()+S.weekOffset*7);
+  const end=new Date(start);end.setDate(end.getDate()+3*7+5);
+  document.getElementById('nav-lbl').textContent=
+    FULL_MONTHS[start.getMonth()]+(start.getMonth()!==end.getMonth()?` – ${FULL_MONTHS[end.getMonth()]}`:'')+` ${end.getFullYear()}`;
+  document.getElementById('nav-sub').textContent=S.weekOffset===0?'This week + 3 ahead':`${S.weekOffset} week${S.weekOffset>1?'s':''} ahead`;
+
+  let html='';
+  for(let w=0;w<4;w++){
+    const mon=new Date(start);mon.setDate(mon.getDate()+w*7);
+    const tue=new Date(mon);tue.setDate(tue.getDate()+1);
+    const thu=new Date(mon);thu.setDate(thu.getDate()+3);
+    const sat=new Date(mon);sat.setDate(sat.getDate()+5);
+    const mk=wKey(mon);
+    const absW=S.weekOffset+w;
+    const td=thuType(absW);
+    const rows=[
+      {date:tue,sk:`${mk}-tue`,day:'Tue',type:'signal'},
+      {date:thu,sk:`${mk}-thu`,day:'Thu',type:td.type},
+      {date:sat,sk:`${mk}-sat`,day:'Sat',type:'longform'}
+    ];
+    const lbl=`${mon.getDate()} ${MONTHS[mon.getMonth()]} – ${sat.getDate()} ${MONTHS[sat.getMonth()]} ${sat.getFullYear()}`;
+    const isCurrentWeek=w===0&&S.weekOffset===0;
+    html+=`<div class="wk"${isCurrentWeek?' style="border-color:var(--mbd)"':''}>
+      <div class="wk-hd">
+        <span class="wk-lbl">${isCurrentWeek?'This week':'Week of '+mon.getDate()+' '+MONTHS[mon.getMonth()]}</span>
+        <span class="wk-dt">${lbl}</span>
+        <button class="btn-g" id="rp-btn-${mk}" style="font-size:11px;padding:4px 10px;margin-left:8px" onclick="replanWeek('${mk}',${absW})">Replan</button>
+      </div>`;
+    rows.forEach(({date,sk,day,type})=>{
+      const topic=S.topics[sk]||'';
+      const ph=getPosted(sk);
+      const isPosted=!!ph;
+      const draftState=getDraftState(sk); // null | 'drafted' | 'approved'
+      const isEmpty=!topic&&!isPosted;
+      const statusDot=isPosted?`<span class="status-dot status-posted" title="Posted"></span>`:'';
+      const topicDisplay=isPosted&&ph.topic?ph.topic:topic;
+      const stateBadge=draftState==='approved'?`<span class="state-badge state-approved">&#10003; Approved</span>`:draftState==='drafted'?`<span class="state-badge state-drafted">Drafted</span>`:'';
+      html+=`<div class="${isPosted?'posted-row':''}">
+        <div class="day-row">
+          <div class="day-nm">${statusDot}${day}<br><span style="font-weight:400;opacity:.65;font-size:10px">${date.getDate()} ${MONTHS[date.getMonth()]}</span></div>
+          <div class="day-body">
+            <div style="display:flex;align-items:center;gap:6px;margin-bottom:4px"><div class="pill ${PILL_MAP[type]}">${LABEL_MAP[type]}</div>${stateBadge}</div>
+            <textarea class="topic-field${isEmpty?' topic-empty':''}" id="tf-${sk}" rows="2"
+              oninput="onTopicInput('${sk}',this)"
+              onfocus="autoH(this)" oninput="autoH(this);onTopicInput('${sk}',this)"
+              placeholder="${isEmpty?'Hit \'Plan 4 weeks\' or type your own…':''}">
+${esc(topicDisplay)}</textarea>
+            ${isPosted?`<div style="font-size:10px;color:#3B6D11;margin-top:3px">&#10003; Posted ${ph.date||''}</div>`:'<div class="edit-hint">Click to edit</div>'}
+            <div class="day-ch">${CH_MAP[type]}</div>
+          </div>
+          <div class="day-act" style="display:flex;flex-direction:column;gap:5px;align-items:flex-end">
+            <button class="btn-g" onclick="openSlot('${sk}','${type}')">Draft</button>
+            ${isPosted?`<button class="btn-g" style="font-size:11px;border-color:var(--bd)" onclick="unmarkPosted('${sk}')">Unmark</button>`:''}
+          </div>
+        </div>
+        <div class="slot-panel" id="slot-${sk}"></div>
+      </div>`;
+    });
+    html+='</div>';
+  }
+  document.getElementById('cal-weeks').innerHTML=html;
+  document.querySelectorAll('.topic-field').forEach(autoH);
+}
+
+function onTopicInput(sk,el){S.topics[sk]=el.value;}
+function autoH(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function openSlot(sk,type){
+  const panel=document.getElementById('slot-'+sk);
+  if(panel.classList.contains('open')){panel.classList.remove('open');panel.innerHTML='';return;}
+  const fmts=FMT_MAP[type]||['x-post'];
+  if(!S.gFmt[sk])S.gFmt[sk]=fmts[0];
+  panel.innerHTML=`
+    <div style="margin-bottom:10px"><label style="margin-bottom:6px;display:block">Format</label>
+      <div class="tg">${fmts.map(f=>`<button class="ch${S.gFmt[sk]===f?' on':''}" onclick="setSlotFmt('${sk}','${f}',this)">${fmtL(f)}</button>`).join('')}</div>
+    </div>
+    <div style="margin-bottom:12px"><label style="margin-bottom:6px;display:block">Additional context or news hook (optional)</label>
+      <input type="text" id="gctx-${sk}" placeholder="Paste a headline, add an angle, or leave blank to use the topic above…">
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:4px">
+      <button class="btn-p" id="gbtn-${sk}" onclick="runSlot('${sk}','${type}')">Generate</button>
+      <button class="btn-g" onclick="openSlot('${sk}','')">Cancel</button>
+    </div>
+    <div id="gout-${sk}"></div>
+    <div id="mark-row-${sk}" style="display:none;margin-top:10px;padding-top:10px;border-top:0.5px solid var(--bd)">
+      <div style="display:flex;gap:7px;flex-wrap:wrap;align-items:center">
+        <button class="state-btn approve" onclick="approveDraft('${sk}','${type}')">&#10003; Approve &amp; add to queue</button>
+        <button class="mark-btn" id="mark-btn-${sk}" onclick="markPosted('${sk}','${type}')">Mark as posted</button>
+        <span style="font-size:11px;color:var(--tx3)">Approved drafts appear in the Queue tab</span>
+      </div>
+    </div>`;
+  panel.classList.add('open');
+  setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}),40);
+}
+
+function fmtL(f){return{'x-post':'X post','x-thread':'X thread','x-article':'X article','linkedin':'LinkedIn','medium':'Medium'}[f]||f;}
+function setSlotFmt(sk,f,b){S.gFmt[sk]=f;const g=b.closest('.tg');if(g)g.querySelectorAll('.ch').forEach(c=>c.classList.remove('on'));b.classList.add('on');}
+
+async function runSlot(sk,type){
+  const tf=document.getElementById('tf-'+sk);
+  const topic=tf?tf.value.trim():'a relevant 2MR Labs topic';
+  const ctx=(document.getElementById('gctx-'+sk)||{}).value||'';
+  const fmt=S.gFmt[sk]||'x-post';
+  const btn=document.getElementById('gbtn-'+sk);btn.disabled=true;btn.textContent='Writing…';
+  const out=document.getElementById('gout-'+sk);
+  out.innerHTML=`<div class="ld" style="margin-top:10px"><div class="dots"><span></span><span></span><span></span></div><span>Writing…</span></div>`;
+  const hooks=getHooks();
+  const hooksCtx=hooks?`\nCurrent news hooks (use these for timeliness):\n${hooks}`:'';
+  let acc='';
+  await api({sys:BRIEF,msgs:[{role:'user',content:buildP(type,fmt,topic,ctx.trim())+hooksCtx}],tok:fmt==='medium'?2000:800,
+    onT:t=>{acc+=t;S.clips['s-'+sk]=acc;renderOut(fmt,acc,'s-'+sk,out);},
+    onD:()=>{
+      btn.disabled=false;btn.textContent='Regenerate';
+      const mr=document.getElementById('mark-row-'+sk);if(mr)mr.style.display='block';
+      // Auto-save as drafted
+      saveDraft(sk,type,topic,acc,fmt);
+      renderCal();
+    },
+    onE:e=>{out.innerHTML=`<p class="err" style="margin-top:8px">Error: ${e}</p>`;btn.disabled=false;btn.textContent='Generate';}
+  });
+}
+
+function setV(k,v,b){S[k]=v;const g=b.closest('.tg');if(g)g.querySelectorAll('.ch').forEach(c=>c.classList.remove('on'));b.classList.add('on');}
+
+function buildP(type,fmt,topic,ctx){
+  const tp={
+    signal:'Content type: Signal post. A world event, infrastructure incident, geopolitical move, or AI development filtered through the sovereignty lens. State what happened and what it means. No analysis theatre.',
+    capability:'Content type: Capability post. Giants OS architecture or a specific design decision. Name the real technology. Explain the thinking. Show the actual system.',
+    founder:'Content type: Founder voice. Lien Choong Luen or Arthur Lin taking a personal position. Draw on specific experience — Sierra Leone, K2, military command, Gojek. Human, specific, direct.',
+    longform:'Content type: Long-form piece. One clear, well-argued position. Opinionated, technically grounded, no hedging.'
+  };
+  const fp={
+    'x-post':'Format: single X post. Max 280 characters. No hashtags. Declarative and minimal. Return only the post text, nothing else.',
+    'x-thread':'Format: X thread of 5–7 tweets. Separate each tweet with exactly "---" on its own line. Max 280 chars each. No tweet numbers, no hashtags. First tweet is a standalone hook.',
+    'x-article':'Format: X Article (long-form native X content). 600–900 words. X Articles support markdown-style formatting: use ## for section headers, **bold** for key phrases, and bullet points sparingly. Write in the established 2MR Labs voice — short declarative paragraphs, no hedging. No hashtags. End with a single call to action sentence.',
+    'linkedin':'Format: LinkedIn post, 150–300 words. Open with a single declarative statement — no filler opener, no emoji, no "excited to share."',
+    'medium':'Format: Medium article, 800–1100 words. Markdown: # title, ## section headers (short, declarative). 4–6 sections. End with a one-sentence 2MR Labs description.'
+  };
+  const hist=historyContext();
+  const ctxBlock=buildContextBlock();
+  const insBlock=getInsightsBlock();
+  return`${tp[type]||''}\n${fp[fmt]||''}\nTopic: ${topic}${ctx?'\nContext/angle: '+ctx:''}${hist?'\n\n'+hist:''}${ctxBlock?'\n'+ctxBlock:''}${insBlock?'\n'+insBlock:''}`;
+}
+
+function renderOut(fmt,acc,key,el){
+  if(fmt==='x-post'){
+    el.innerHTML=`<div class="oa"><div class="ot">${esc(acc)}</div><div class="tw-l">${acc.length}/280</div></div><div class="orow"><button class="cp" onclick="doCopy('${key}',this)">Copy</button></div>`;
+  } else if(fmt==='x-thread'){
+    const ts=acc.split(/^---$/m).map(t=>t.trim()).filter(t=>t.length>2);
+    el.innerHTML=ts.map((t,i)=>`<div class="tw-card"><div class="tw-num">Tweet ${i+1} · ${t.length}/280</div><div class="ot">${esc(t)}</div></div>`).join('')+`<div class="orow"><button class="cp" onclick="doCopy('${key}',this)">Copy all</button></div>`;
+  } else if(fmt==='x-article'){
+    el.innerHTML=`<div class="oa art"><div style="font-size:11px;color:var(--tx3);margin-bottom:8px;padding:4px 8px;background:var(--bg2);border-radius:var(--r);display:inline-block">X Article</div>${mdH(acc)}</div><div class="orow"><button class="cp" onclick="doCopy('${key}',this)">Copy markdown</button></div>`;
+  } else if(fmt==='medium'){
+    el.innerHTML=`<div class="oa art">${mdH(acc)}</div><div class="orow"><button class="cp" onclick="doCopy('${key}',this)">Copy markdown</button></div>`;
+  } else {
+    el.innerHTML=`<div class="oa"><div class="ot">${esc(acc)}</div></div><div class="orow"><button class="cp" onclick="doCopy('${key}',this)">Copy</button></div>`;
+  }
+}
+
+function doCopy(key,btn){
+  navigator.clipboard.writeText(S.clips[key]||'').then(()=>{btn.textContent='Copied!';btn.classList.add('ok');setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('ok');},1600);});
+}
+
+async function genCreate(){
+  const ctx=document.getElementById('cr-ctx').value.trim();
+  const btn=document.getElementById('cr-btn');btn.disabled=true;btn.textContent='Writing…';
+  const out=document.getElementById('cr-out');
+  out.innerHTML=`<div class="ld" style="margin-top:12px"><div class="dots"><span></span><span></span><span></span></div><span>Writing…</span></div>`;
+  let acc='';
+  await api({sys:BRIEF,msgs:[{role:'user',content:buildP(S.ct,S.fmt,ctx||'Choose a relevant and timely 2MR Labs topic.','')}],tok:S.fmt==='medium'?2000:800,
+    onT:t=>{acc+=t;S.clips.cr=acc;renderOut(S.fmt,acc,'cr',out);},
+    onD:()=>{btn.disabled=false;btn.textContent='Generate';},
+    onE:e=>{out.innerHTML=`<p class="err" style="margin-top:12px">Error: ${e}</p>`;btn.disabled=false;btn.textContent='Generate';}
+  });
+}
+
+function setChip(b){document.getElementById('chat-in').value=b.textContent.trim();document.getElementById('chat-in').focus();}
+function chatKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();}}
+
+async function sendChat(){
+  const inp=document.getElementById('chat-in');const txt=inp.value.trim();if(!txt)return;
+  inp.value='';const btn=document.getElementById('chat-btn');btn.disabled=true;
+  const box=document.getElementById('chat-msgs');
+  box.innerHTML+=`<div class="msg u">${esc(txt)}</div>`;
+  S.chatH.push({role:'user',content:txt});
+  const div=document.createElement('div');div.className='msg a';div.textContent='';
+  box.appendChild(div);box.scrollTop=box.scrollHeight;
+  const ctxBlock=buildContextBlock();
+  const insBlock=getInsightsBlock();
+  const sys=(ctxBlock||insBlock)?BRIEF+(ctxBlock||'')+(insBlock||''):BRIEF;
+  let acc='';
+  await api({sys,msgs:S.chatH,tok:1400,
+    onT:t=>{acc+=t;div.textContent=acc;box.scrollTop=box.scrollHeight;},
+    onD:()=>{S.chatH.push({role:'assistant',content:acc});btn.disabled=false;inp.focus();},
+    onE:e=>{div.textContent=`Error: ${e}`;div.style.color='#E24B4A';btn.disabled=false;}
+  });
+}
+
+function getKey(){return localStorage.getItem('anthropic_key')||'';}
+
+function saveKey(){
+  const v=document.getElementById('key-input').value.trim();
+  if(!v||!v.startsWith('sk-')){alert('Please enter a valid Anthropic API key (starts with sk-ant-).');return;}
+  localStorage.setItem('anthropic_key',v);
+  document.getElementById('setup-screen').classList.add('hidden');
+}
+
+function promptKey(){
+  const cur=getKey();
+  const v=prompt('Paste your Anthropic API key (starts with sk-ant-):', cur?'sk-ant-…  [key set, paste new to replace]':'');
+  if(v&&v.startsWith('sk-')){localStorage.setItem('anthropic_key',v);alert('Key updated.');}
+  else if(v!==null&&v!==''){alert('Invalid key — must start with sk-ant-');}
+}
+
+function checkKey(){
+  if(!getKey()) document.getElementById('setup-screen').classList.remove('hidden');
+}
+
+async function api({sys,msgs,tok,temp,onT,onD,onE}){
+  const key=getKey();
+  if(!key){onE('No API key. Click the key indicator in the header to add one.');return;}
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:tok||1200,stream:true,system:sys,messages:msgs,...(temp!==undefined?{temperature:temp}:{})})
+    });
+    if(!r.ok){const e=await r.json().catch(()=>({}));onE(e.error?.message||`HTTP ${r.status}`);return;}
+    const rd=r.body.getReader();const dc=new TextDecoder();let buf='';
+    while(true){const{done,value}=await rd.read();if(done)break;buf+=dc.decode(value,{stream:true});const ls=buf.split('\n');buf=ls.pop()||'';for(const l of ls){if(!l.startsWith('data: '))continue;const raw=l.slice(6);if(raw==='[DONE]')continue;try{const o=JSON.parse(raw);if(o.type==='content_block_delta'&&o.delta?.type==='text_delta')onT(o.delta.text);}catch{}}}
+    onD();
+  }catch(e){onE(e.message);}
+}
+
+function mdH(t){
+  let h=t.replace(/^### (.+)$/gm,'<h3>$1</h3>').replace(/^## (.+)$/gm,'<h2>$1</h2>').replace(/^# (.+)$/gm,'<h1>$1</h1>').replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/^[-*] (.+)$/gm,'<li>$1</li>').replace(/((?:<li>[^\n]*<\/li>\n?)+)/g,m=>'<ul>'+m+'</ul>');
+  const ls=h.split('\n');const o=[];let p=false;
+  for(const l of ls){const t2=l.trim();if(!t2){if(p){o.push('</p>');p=false;}continue;}if(/^<[hul]/.test(t2)){if(p){o.push('</p>');p=false;}o.push(t2);}else{if(!p){o.push('<p>');p=true;}o.push(t2+' ');}}
+  if(p)o.push('</p>');return o.join('');
+}
+
+let AX = null;
+let LI = null;
+
+function handleXFile(file) {
+  if (!file || !file.name.endsWith('.csv')) { alert('Please upload a .csv file from X analytics.'); return; }
+  const reader = new FileReader();
+  reader.onload = e => parseCSV(e.target.result, file.name);
+  reader.readAsText(file);
+}
+
+function handleLiFile(file) {
+  if (!file) return;
+  const name = file.name.toLowerCase();
+  if (!name.endsWith('.csv') && !name.endsWith('.xls') && !name.endsWith('.xlsx')) {
+    alert('Please upload a CSV file from LinkedIn analytics.');return;
+  }
+  const reader = new FileReader();
+  reader.onload = e => parseLiCSV(e.target.result, file.name);
+  reader.readAsText(file);
+}
+
+function parseLiCSV(text, filename) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) { alert('LinkedIn CSV appears empty.'); return; }
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+  const find = (...keys) => { for (const k of keys) { const i = headers.findIndex(h => h.includes(k)); if (i >= 0) return i; } return -1; };
+
+  const iText = find('post content', 'content', 'text', 'message');
+  const iDate = find('date', 'created', 'published');
+  const iImp  = find('impression');
+  const iEng  = find('engagement');
+  const iLike = find('like', 'reaction');
+  const iComment = find('comment');
+  const iRepost = find('repost', 'reshare', 'share');
+  const iClick = find('click');
+
+  if (iImp < 0) { alert('Could not find impressions column. Make sure this is a LinkedIn post analytics export.'); return; }
+
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCSVLine(lines[i]);
+    if (cols.length < 2) continue;
+    const get = idx => idx >= 0 ? (cols[idx] || '').replace(/^"|"$/g, '').trim() : '';
+    const num = idx => { const v = parseFloat(get(idx).replace(/[%,]/g,'')); return isNaN(v) ? 0 : v; };
+    const imp = num(iImp); if (imp === 0 && i > 1) continue;
+    const eng = num(iEng);
+    rows.push({
+      text: get(iText).slice(0, 200),
+      time: get(iDate),
+      impressions: imp,
+      engagements: eng,
+      rate: imp > 0 ? (eng / imp) * 100 : 0,
+      likes: num(iLike),
+      comments: num(iComment),
+      reposts: num(iRepost),
+      clicks: num(iClick)
+    });
+  }
+  if (rows.length === 0) { alert('No post data found in this LinkedIn CSV.'); return; }
+  rows.sort((a, b) => b.impressions - a.impressions);
+
+  const totalImp = rows.reduce((s, r) => s + r.impressions, 0);
+  const totalEng = rows.reduce((s, r) => s + r.engagements, 0);
+  const avgRate  = rows.reduce((s, r) => s + r.rate, 0) / rows.length;
+  const dates = rows.map(r => r.time).filter(Boolean).map(d=>{const p=new Date(d);return isNaN(p)?d.slice(0,10):p.toISOString().slice(0,10);}).sort();
+  const period = dates.length ? `${dates[0]} – ${dates[dates.length-1]}` : filename;
+
+  LI = { rows, totalImp, totalEng, avgRate, period, count: rows.length };
+
+  const status = document.getElementById('li-upload-status');
+  if (status) { status.textContent = `✓ ${rows.length} posts loaded (${period})`; status.style.display = 'block'; }
+  const zone = document.getElementById('drop-zone-li');
+  if (zone) zone.style.borderColor = '#97C459';
+  updateStartBtn();
+  if (AX || LI) renderAnalytics();
+}
+
+function parseCSV(text, filename) {
+  const lines = text.trim().split('\n');
+  if (lines.length < 2) { alert('CSV appears empty.'); return; }
+  const headers = lines[0].split(',').map(h => h.trim().replace(/^"|"$/g, '').toLowerCase());
+  const find = (...keys) => { for (const k of keys) { const i = headers.findIndex(h => h.includes(k)); if (i >= 0) return i; } return -1; };
+  const iText = find('tweet text', 'text');
+  const iTime = find('time', 'date');
+  const iImp = find('impression');
+  const iEng = find('engagement', 'engagements');
+  const iRate = find('engagement rate', 'rate');
+  const iRT = find('retweet');
+  const iLike = find('like');
+  const iReply = find('repl');
+  const iClick = find('url click', 'link click');
+  if (iImp < 0) { alert('Could not find impressions column. Make sure this is an X tweet activity export.'); return; }
+
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCSVLine(lines[i]);
+    if (cols.length < 3) continue;
+    const get = idx => idx >= 0 ? (cols[idx] || '').replace(/^"|"$/g, '').trim() : '';
+    const num = idx => { const v = parseFloat(get(idx).replace('%','')); return isNaN(v) ? 0 : v; };
+    const imp = num(iImp); if (imp === 0 && i > 1) continue;
+    rows.push({
+      text: get(iText).slice(0, 200),
+      time: get(iTime),
+      impressions: imp,
+      engagements: num(iEng),
+      rate: num(iRate),
+      retweets: num(iRT),
+      likes: num(iLike),
+      replies: num(iReply),
+      clicks: num(iClick)
+    });
+  }
+  if (rows.length === 0) { alert('No tweet data found in this file.'); return; }
+
+  // Deduplicate by text+date to handle overlapping exports
+  const seen = new Set();
+  const deduped = rows.filter(r => {
+    const key = (r.text.slice(0,80) + '|' + r.time.slice(0,10)).toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key); return true;
+  });
+
+  deduped.sort((a, b) => b.impressions - a.impressions);
+
+  const totalImp = deduped.reduce((s, r) => s + r.impressions, 0);
+  const totalEng = deduped.reduce((s, r) => s + r.engagements, 0);
+  const avgRate  = deduped.reduce((s, r) => s + r.rate, 0) / deduped.length;
+  const dates = deduped.map(r => r.time).filter(Boolean).map(d=>{const p=new Date(d);return isNaN(p)?d.slice(0,10):p.toISOString().slice(0,10);}).sort();
+  const period = dates.length ? `${dates[0]} – ${dates[dates.length-1]}` : filename;
+
+  // Calculate actual posting frequency
+  let postsPerWeek = null;
+  if (dates.length >= 2) {
+    const daySpan = Math.max(1, (new Date(dates[dates.length-1]) - new Date(dates[0])) / (1000*60*60*24));
+    postsPerWeek = (deduped.length / daySpan * 7).toFixed(1);
+  }
+
+  AX = { rows: deduped, totalImp, totalEng, avgRate, period, count: deduped.length, postsPerWeek };
+  tagHistoryWithPerformance();
+
+  const status = document.getElementById('x-upload-status');
+  if (status) { status.textContent = `✓ ${rows.length} posts loaded (${period})`; status.style.display = 'block'; }
+  const zone = document.getElementById('drop-zone-x');
+  if (zone) zone.style.borderColor = '#97C459';
+  updateStartBtn();
+  renderAnalytics();
+}
+
+function splitCSVLine(line) {
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    if (line[i] === '"') { inQ = !inQ; }
+    else if (line[i] === ',' && !inQ) { result.push(cur); cur = ''; }
+    else { cur += line[i]; }
+  }
+  result.push(cur); return result;
+}
+
+function fmt(n) { return n >= 1000000 ? (n/1000000).toFixed(1)+'M' : n >= 1000 ? (n/1000).toFixed(1)+'K' : Math.round(n).toString(); }
+function fmtPct(n) { return n.toFixed(2)+'%'; }
+
+function updateStartBtn(){
+  const btn=document.getElementById('ax-start-btn');
+  if(!btn)return;
+  const ready=AX||LI;
+  btn.disabled=!ready;
+  btn.style.opacity=ready?'1':'.38';
+}
+
+function startAnalysis(){
+  document.getElementById('ax-upload').style.display='none';
+  document.getElementById('ax-data').style.display='block';
+  renderAnalytics();
+}
+
+function renderAnalytics(){
+  if(!AX&&!LI)return;
+  const periods=[AX?.period,LI?.period].filter(Boolean);
+  document.getElementById('ax-period').textContent=periods.join(' · ');
+
+  if(AX){
+    const best=AX.rows[0];
+    document.getElementById('ax-metrics').innerHTML=`
+      <div class="metric-card"><div class="metric-lbl">X impressions</div><div class="metric-val">${fmt(AX.totalImp)}</div></div>
+      <div class="metric-card"><div class="metric-lbl">X engagements</div><div class="metric-val">${fmt(AX.totalEng)}</div></div>
+      <div class="metric-card"><div class="metric-lbl">Avg eng rate</div><div class="metric-val">${fmtPct(AX.avgRate)}</div></div>
+      <div class="metric-card"><div class="metric-lbl">X posts</div><div class="metric-val">${AX.count}</div></div>
+      <div class="metric-card"><div class="metric-lbl">Best post</div><div class="metric-val">${fmt(best.impressions)}</div><div class="metric-sub">${fmtPct(best.rate)} eng</div></div>`;
+    const maxImp=AX.rows[0].impressions||1;
+    document.getElementById('ax-post-count').textContent=`${AX.count} posts`;
+    document.getElementById('ax-table').innerHTML=`
+      <thead><tr><th>Post</th><th class="num">Impressions</th><th class="num">Eng rate</th><th class="num">Likes</th><th class="num">RTs</th></tr></thead>
+      <tbody>${AX.rows.slice(0,10).map(r=>`<tr>
+        <td class="post-text">${esc(r.text.slice(0,120))}${r.text.length>120?'…':''}
+          <div class="eng-bar"><div class="eng-fill" style="width:${Math.round(r.impressions/maxImp*100)}%"></div></div></td>
+        <td class="num">${fmt(r.impressions)}</td><td class="num">${fmtPct(r.rate)}</td>
+        <td class="num">${fmt(r.likes)}</td><td class="num">${fmt(r.retweets)}</td>
+      </tr>`).join('')}</tbody>`;
+  }
+
+  const liSec=document.getElementById('li-data-section');
+  if(LI&&liSec){
+    liSec.style.display='block';
+    const maxLi=LI.rows[0].impressions||1;
+    document.getElementById('li-metrics').innerHTML=`
+      <div class="metric-card"><div class="metric-lbl">LI impressions</div><div class="metric-val">${fmt(LI.totalImp)}</div></div>
+      <div class="metric-card"><div class="metric-lbl">LI engagements</div><div class="metric-val">${fmt(LI.totalEng)}</div></div>
+      <div class="metric-card"><div class="metric-lbl">Avg eng rate</div><div class="metric-val">${fmtPct(LI.avgRate)}</div></div>
+      <div class="metric-card"><div class="metric-lbl">LI posts</div><div class="metric-val">${LI.count}</div></div>`;
+    document.getElementById('li-post-count').textContent=`${LI.count} posts`;
+    document.getElementById('li-table').innerHTML=`
+      <thead><tr><th>Post</th><th class="num">Impressions</th><th class="num">Eng rate</th><th class="num">Likes</th><th class="num">Comments</th></tr></thead>
+      <tbody>${LI.rows.slice(0,10).map(r=>`<tr>
+        <td class="post-text">${esc(r.text.slice(0,120))}${r.text.length>120?'…':''}
+          <div class="eng-bar"><div class="eng-fill" style="width:${Math.round(r.impressions/maxLi*100)}%"></div></div></td>
+        <td class="num">${fmt(r.impressions)}</td><td class="num">${fmtPct(r.rate)}</td>
+        <td class="num">${fmt(r.likes)}</td><td class="num">${fmt(r.comments)}</td>
+      </tr>`).join('')}</tbody>`;
+  }
+}
+
+function resetAnalytics(){
+  AX=null;LI=null;
+  document.getElementById('ax-upload').style.display='block';
+  document.getElementById('ax-data').style.display='none';
+  document.getElementById('ax-rec').innerHTML='';
+  const ar=document.getElementById('ax-apply-row');if(ar)ar.style.display='none';
+  ['csv-input-x','csv-input-li'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  ['x-upload-status','li-upload-status'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  ['drop-zone-x','drop-zone-li'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.borderColor='';});
+  const lis=document.getElementById('li-data-section');if(lis)lis.style.display='none';
+  updateStartBtn();
+}
+
+async function runAnalysis(){
+  if(!AX&&!LI)return;
+  const btn=document.getElementById('ax-analyse-btn');
+  btn.disabled=true;btn.textContent='Analysing…';
+  const rec=document.getElementById('ax-rec');
+  rec.innerHTML=`<div class="ld" style="margin-top:14px"><div class="dots"><span></span><span></span><span></span></div><span>Analysing your data…</span></div>`;
+
+  let dataPrompt='Analyse this social media analytics data for 2MR Labs.\n\n';
+
+  if(AX){
+    const top5=AX.rows.slice(0,5).map((r,i)=>`${i+1}. "${r.text.slice(0,120)}" — ${fmt(r.impressions)} impressions, ${fmtPct(r.rate)} eng rate, ${fmt(r.likes)} likes, ${fmt(r.retweets)} RTs`).join('\n');
+    const bot5=AX.rows.slice(-5).map((r,i)=>`${i+1}. "${r.text.slice(0,80)}" — ${fmt(r.impressions)} impressions, ${fmtPct(r.rate)} eng rate`).join('\n');
+    const mid=AX.rows.slice(Math.floor(AX.rows.length/2)-2,Math.floor(AX.rows.length/2)+3).map((r,i)=>`${i+1}. "${r.text.slice(0,80)}" — ${fmt(r.impressions)} impressions, ${fmtPct(r.rate)} eng rate`).join('\n');
+    dataPrompt+=`X (TWITTER) DATA\nPERIOD: ${AX.period}\nPOSTS: ${AX.count}${AX.postsPerWeek?' ('+AX.postsPerWeek+' posts/week actual)':''} | IMPRESSIONS: ${fmt(AX.totalImp)} | ENGAGEMENTS: ${fmt(AX.totalEng)} | AVG ENG RATE: ${fmtPct(AX.avgRate)}\n\nTOP 5 X POSTS:\n${top5}\n\nMID-RANGE X POSTS:\n${mid}\n\nBOTTOM 5 X POSTS:\n${bot5}\n\n`;
+  }
+
+  if(LI){
+    const top5li=LI.rows.slice(0,5).map((r,i)=>`${i+1}. "${r.text.slice(0,120)}" — ${fmt(r.impressions)} impressions, ${fmtPct(r.rate)} eng rate, ${fmt(r.likes)} likes, ${fmt(r.comments)} comments`).join('\n');
+    const bot5li=LI.rows.slice(-5).map((r,i)=>`${i+1}. "${r.text.slice(0,80)}" — ${fmt(r.impressions)} impressions, ${fmtPct(r.rate)} eng rate`).join('\n');
+    dataPrompt+=`LINKEDIN DATA\nPERIOD: ${LI.period}\nPOSTS: ${LI.count} | IMPRESSIONS: ${fmt(LI.totalImp)} | ENGAGEMENTS: ${fmt(LI.totalEng)} | AVG ENG RATE: ${fmtPct(LI.avgRate)}\n\nTOP 5 LINKEDIN POSTS:\n${top5li}\n\nBOTTOM 5 LINKEDIN POSTS:\n${bot5li}\n\n`;
+  }
+
+  dataPrompt+=`Produce the analysis using EXACTLY this structure — no deviations, no additional sections, no reordering:
+
+---
+## 1. Performance Summary
+[3 sentences max. State total impressions, average engagement rate, and one headline observation. Reference actual numbers.]
+
+## 2. Platform Breakdown
+[For each platform with data, one paragraph. State the key metric, what it indicates, and one specific observation grounded in the data.]
+
+## 3. Pattern Insights
+[Exactly 3 bullet points. Each must cite a specific post or metric. Format: "• [Observation] — [evidence from data]"]
+
+## 4. Strategic Recommendations
+**Writing:** [One specific, actionable sentence]
+**Topics:** [One specific, actionable sentence]
+**Platform Strategy:** [One specific, actionable sentence]
+**Posting Strategy:** [One specific, actionable sentence]
+
+## 5. Content Strategy Update
+[PRIORITISE] [one sentence — what to do more of, grounded in data]
+[AVOID] [one sentence — what to stop, grounded in data]
+[FORMAT] [one sentence — which format is working best]
+[TOPIC] [one sentence — which topic area is strongest]
+[TONE] [one sentence — what tone pattern is working]
+---
+
+Base every statement on the data provided. Do not speculate. Do not add sections. Do not change the format.`;
+
+  let acc='';
+  S.clips.analysis='';
+  await api({
+    sys:ANALYTICS_BRIEF,
+    msgs:[{role:'user',content:dataPrompt}],
+    tok:4000,
+    temp:0,
+    onT:t=>{acc+=t;S.clips.analysis=acc;rec.innerHTML=`<div class="ai-rec">${mdH(acc)}</div>`;},
+    onD:()=>{
+      btn.disabled=false;btn.textContent='Analyse & recommend';
+      S.lastAnalysis=acc;
+      S.lastAnalysisPeriod=[AX?.period,LI?.period].filter(Boolean).join(' + ');
+      const applyRow=document.getElementById('ax-apply-row');
+      if(applyRow)applyRow.style.display='block';
+    },
+    onE:e=>{rec.innerHTML=`<p class="err" style="margin-top:12px">Error: ${e}</p>`;btn.disabled=false;btn.textContent='Analyse & recommend';}
+  });
+}
+
+// ── ANALYTICS INSIGHTS STORE ─────────────────────────────────────────────────
+// Structure: [{id, period, savedAt, bullets:[{id, text, active}]}]
+function loadInsights(){
+  try{
+    const raw=localStorage.getItem('2mr_insights');
+    if(!raw)return[];
+    const parsed=JSON.parse(raw);
+    // Migrate old single-object format to array
+    if(!Array.isArray(parsed)){
+      if(parsed&&parsed.bullets){
+        return[{id:'ins-legacy',period:parsed.period||'',savedAt:parsed.savedAt||'',
+          bullets:parsed.bullets.map((b,i)=>({id:'b-'+i,text:b,active:true}))}];
+      }
+      return[];
+    }
+    return parsed;
+  }catch{return[];}
+}
+function saveInsightsArr(arr){localStorage.setItem('2mr_insights',JSON.stringify(arr));}
+
+function clearInsights(){
+  localStorage.removeItem('2mr_insights');
+  renderInsightsBadge();renderStrategyPanel();
+  const applyBtn=document.getElementById('ax-apply-btn');
+  if(applyBtn){applyBtn.textContent='Apply to content strategy';applyBtn.disabled=false;}
+}
+
+function renderInsightsBadge(){
+  const badge=document.getElementById('insights-badge');
+  if(!badge)return;
+  const sets=loadInsights();
+  const activeCount=sets.reduce((n,s)=>n+s.bullets.filter(b=>b.active).length,0);
+  badge.style.display=activeCount>0?'flex':'none';
+}
+
+function getInsightsBlock(){
+  const sets=loadInsights();
+  const activeBullets=sets.flatMap(s=>s.bullets.filter(b=>b.active).map(b=>b.text));
+  if(!activeBullets.length)return'';
+  const period=sets.map(s=>s.period).filter(Boolean).join(', ');
+  return'\n\nANALYTICS INSIGHTS ('+period+'):\n'+activeBullets.map(b=>'• '+b).join('\n')+'\nApply these patterns — bias content generation toward what is working, away from what is not.\n';
+}
+
+function toggleStrategyPanel(){
+  const body=document.getElementById('strategy-body');
+  const arrow=document.getElementById('strategy-arrow');
+  if(!body)return;
+  const open=body.classList.toggle('open');
+  if(arrow)arrow.textContent=open?'▲':'▼';
+  if(open)renderStrategyPanel();
+}
+
+function renderStrategyPanel(){
+  const sets=loadInsights();
+  const list=document.getElementById('strategy-list');
+  const sub=document.getElementById('strategy-hd-sub');
+  if(!list)return;
+
+  const totalActive=sets.reduce((n,s)=>n+s.bullets.filter(b=>b.active).length,0);
+  const total=sets.reduce((n,s)=>n+s.bullets.length,0);
+  if(sub)sub.textContent=total>0?`${totalActive} of ${total} bullets active across ${sets.length} analysis${sets.length!==1?'es':''}` :'No insights applied yet';
+
+  if(!sets.length){
+    list.innerHTML=`<div class="strategy-empty">No content strategy insights yet.<br>Run an analysis and hit "Apply to content strategy" to add patterns here.</div>`;
+    return;
+  }
+
+  list.innerHTML=sets.map(set=>`
+    <div class="ins-set">
+      <div class="ins-set-hd">
+        <div>
+          <div class="ins-set-period">${esc(set.period||'Manual')}</div>
+          <div class="ins-set-date">Applied ${esc(set.savedAt||'')}</div>
+        </div>
+        <button class="ins-set-del" onclick="deleteInsightSet('${set.id}')" title="Remove this analysis">Remove</button>
+      </div>
+      ${set.bullets.map(b=>`
+        <div class="ins-bullet" id="ib-${b.id}">
+          <input type="checkbox" class="ins-bullet-toggle" ${b.active?'checked':''} onchange="toggleBullet('${set.id}','${b.id}',this.checked)">
+          <div class="ins-bullet-text${b.active?'':' inactive'}" id="ibt-${b.id}">${esc(b.text)}</div>
+          <button class="ins-bullet-edit" onclick="editBullet('${set.id}','${b.id}')" title="Edit">✎</button>
+          <button class="ins-bullet-del" onclick="deleteBullet('${set.id}','${b.id}')" title="Delete">✕</button>
+        </div>`).join('')}
+    </div>`).join('');
+}
+
+function toggleBullet(setId,bId,active){
+  const sets=loadInsights();
+  const s=sets.find(s=>s.id===setId);
+  if(s){const b=s.bullets.find(b=>b.id===bId);if(b)b.active=active;}
+  saveInsightsArr(sets);
+  renderInsightsBadge();
+  const el=document.getElementById('ibt-'+bId);
+  if(el)el.className='ins-bullet-text'+(active?'':' inactive');
+}
+
+function editBullet(setId,bId){
+  const sets=loadInsights();
+  const s=sets.find(s=>s.id===setId);
+  if(!s)return;
+  const b=s.bullets.find(b=>b.id===bId);
+  if(!b)return;
+  const row=document.getElementById('ib-'+bId);
+  if(!row)return;
+  const textEl=document.getElementById('ibt-'+bId);
+  if(!textEl)return;
+  // Replace text with input
+  textEl.outerHTML=`<textarea class="ins-edit-field" id="ibt-${bId}" rows="2" onblur="saveBulletEdit('${setId}','${bId}',this)">${esc(b.text)}</textarea>`;
+  const ta=document.getElementById('ibt-'+bId);
+  if(ta){ta.focus();ta.select();}
+}
+
+function saveBulletEdit(setId,bId,el){
+  const val=el.value.trim();
+  if(!val){el.focus();return;}
+  const sets=loadInsights();
+  const s=sets.find(s=>s.id===setId);
+  if(s){const b=s.bullets.find(b=>b.id===bId);if(b)b.text=val;}
+  saveInsightsArr(sets);
+  renderStrategyPanel();
+  renderInsightsBadge();
+}
+
+function deleteBullet(setId,bId){
+  const sets=loadInsights();
+  const s=sets.find(s=>s.id===setId);
+  if(s)s.bullets=s.bullets.filter(b=>b.id!==bId);
+  // Remove set if empty
+  const filtered=sets.filter(s=>s.bullets.length>0);
+  saveInsightsArr(filtered);
+  renderStrategyPanel();
+  renderInsightsBadge();
+}
+
+function deleteInsightSet(setId){
+  if(!confirm('Remove this analysis from content strategy?'))return;
+  saveInsightsArr(loadInsights().filter(s=>s.id!==setId));
+  renderStrategyPanel();
+  renderInsightsBadge();
+}
+
+function addManualInsight(){
+  const inp=document.getElementById('ins-manual-input');
+  const val=inp?inp.value.trim():'';
+  if(!val)return;
+  const sets=loadInsights();
+  const manualSet=sets.find(s=>s.id==='ins-manual')||null;
+  if(manualSet){
+    manualSet.bullets.push({id:'b-'+Date.now(),text:val,active:true});
+  } else {
+    sets.unshift({id:'ins-manual',period:'Manual entries',savedAt:new Date().toISOString().slice(0,10),
+      bullets:[{id:'b-'+Date.now(),text:val,active:true}]});
+  }
+  saveInsightsArr(sets);
+  if(inp)inp.value='';
+  renderStrategyPanel();
+  renderInsightsBadge();
+}
+
+async function applyInsights(){
+  if(!S.lastAnalysis){alert('Run the analysis first.');return;}
+  const btn=document.getElementById('ax-apply-btn');
+  btn.disabled=true;btn.textContent='Extracting…';
+
+  const extractPrompt='From this analytics report, extract only the Content Strategy Update bullets (section 5). Return ONLY a JSON array of strings — the bullet text without the label brackets. Max 5 items. No markdown, no explanation.\n\nREPORT:\n'+S.lastAnalysis;
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:400,temperature:0,messages:[{role:'user',content:extractPrompt}]})
+    });
+    const d=await r.json();
+    const raw=(d.content?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const bullets=JSON.parse(raw);
+    const period=S.lastAnalysisPeriod||AX?.period||'unknown';
+    const sets=loadInsights();
+    sets.unshift({
+      id:'ins-'+Date.now(),
+      period,
+      savedAt:new Date().toISOString().slice(0,10),
+      bullets:bullets.map((b,i)=>({id:'b-'+Date.now()+'-'+i,text:b,active:true}))
+    });
+    saveInsightsArr(sets);
+    renderInsightsBadge();
+    renderStrategyPanel();
+    // Open the strategy panel so user sees what was added
+    const body=document.getElementById('strategy-body');
+    const arrow=document.getElementById('strategy-arrow');
+    if(body&&!body.classList.contains('open')){body.classList.add('open');if(arrow)arrow.textContent='▲';}
+    btn.textContent='Applied ✓';btn.style.background='#3B6D11';
+    setTimeout(()=>{btn.textContent='Apply to content strategy';btn.style.background='';btn.disabled=false;},2000);
+    localStorage.removeItem(planCacheKey());
+    setPlanStatus('Analytics insights applied — next plan generation will reflect these patterns');
+  }catch(e){
+    alert('Extraction failed: '+e.message);
+    btn.disabled=false;btn.textContent='Apply to content strategy';
+  }
+}
+
+function loadHistory(){try{return JSON.parse(localStorage.getItem('2mr_history')||'[]');}catch{return[];}}
+function saveHistory(h){localStorage.setItem('2mr_history',JSON.stringify(h.slice(-40)));}
+function loadPosted(){try{return JSON.parse(localStorage.getItem('2mr_posted')||'{}');}catch{return{};}}
+function savePostedMap(m){localStorage.setItem('2mr_posted',JSON.stringify(m));}
+function getPosted(sk){return loadPosted()[sk]||null;}
+
+function markPosted(sk,type){
+  const tf=document.getElementById('tf-'+sk);
+  const topic=tf?tf.value.trim():'';
+  const text=S.clips['s-'+sk]||'';
+  const date=new Date().toISOString().slice(0,10);
+  const h=loadHistory();
+  h.push({sk,type,topic,text:text.slice(0,200),date});
+  saveHistory(h);
+  const pm=loadPosted();
+  pm[sk]={topic,date,type};
+  savePostedMap(pm);
+  const btn=document.getElementById('mark-btn-'+sk);
+  if(btn){btn.textContent='✓ Posted';btn.classList.add('done');btn.disabled=true;}
+  renderCal();
+}
+
+function unmarkPosted(sk){
+  const pm=loadPosted();
+  delete pm[sk];
+  savePostedMap(pm);
+  const h=loadHistory().filter(p=>p.sk!==sk);
+  saveHistory(h);
+  renderCal();
+}
+
+function clearHistory(){
+  localStorage.removeItem('2mr_history');
+  localStorage.removeItem('2mr_posted');
+  renderCal();
+  renderHistoryTab();
+}
+
+function renderHistoryTab(){
+  const h=loadHistory().slice().reverse();
+  const el=document.getElementById('history-list');
+  if(!el)return;
+  if(!h.length){el.innerHTML=`<div style="font-size:13px;color:var(--tx3);padding:20px 0">No posts marked yet. Generate content, then hit "Mark as posted" to track what's been published.</div>`;return;}
+  el.innerHTML=`<div class="history-panel"><div class="history-hd"><span style="font-size:12px;font-weight:500">${h.length} published posts</span></div>${h.map((p,i)=>`<div class="history-row"><div class="history-date">${p.date}<br><span class="history-type">${p.type}</span></div><div class="history-text">${esc(p.topic||p.text.slice(0,100))}</div><button class="del-btn" onclick="deleteHistoryItem(${loadHistory().length-1-i})">✕</button></div>`).join('')}</div>`;
+}
+
+function deleteHistoryItem(idx){
+  const h=loadHistory();
+  const item=h[idx];
+  h.splice(idx,1);
+  saveHistory(h);
+  if(item&&item.sk){const pm=loadPosted();delete pm[item.sk];savePostedMap(pm);}
+  renderCal();
+  renderHistoryTab();
+}
+
+// ── NEWS HOOKS ──────────────────────────────────────────────────────────────
+function getHooks(){return(document.getElementById('hooks-input')||{}).value||'';}
+function toggleHooks(){
+  const body=document.getElementById('hooks-body');
+  const arrow=document.getElementById('hooks-arrow');
+  const isOpen=body.classList.contains('open');
+  body.classList.toggle('open');
+  arrow.textContent=isOpen?'▼':'▲';
+}
+
+// ── DRAFT STATES ─────────────────────────────────────────────────────────────
+function loadDrafts(){try{return JSON.parse(localStorage.getItem('2mr_drafts')||'{}');}catch{return{};}}
+function saveDrafts(d){localStorage.setItem('2mr_drafts',JSON.stringify(d));}
+function getDraftState(sk){const d=loadDrafts();return d[sk]?d[sk].state:null;}
+
+function saveDraft(sk,type,topic,content,fmt){
+  const d=loadDrafts();
+  d[sk]={state:'drafted',type,topic,content,fmt,date:new Date().toISOString().slice(0,10),updatedAt:Date.now()};
+  saveDrafts(d);
+  updateQueueCount();
+}
+
+function approveDraft(sk,type){
+  const d=loadDrafts();
+  if(!d[sk]){
+    // Create from current clip if no saved draft
+    const topic=(document.getElementById('tf-'+sk)||{}).value||'';
+    const content=S.clips['s-'+sk]||'';
+    const fmt=S.gFmt[sk]||'x-post';
+    d[sk]={state:'approved',type,topic,content,fmt,date:new Date().toISOString().slice(0,10),updatedAt:Date.now()};
+  } else {
+    d[sk].state='approved';d[sk].updatedAt=Date.now();
+  }
+  saveDrafts(d);
+  updateQueueCount();
+  renderCal();
+  // Flash feedback
+  const btn=event.target;btn.textContent='Approved!';setTimeout(()=>{btn.textContent='✓ Approve & add to queue';},1500);
+}
+
+function removeDraft(sk){
+  const d=loadDrafts();delete d[sk];saveDrafts(d);
+  updateQueueCount();renderQueueTab();renderCal();
+}
+
+function updateQueueCount(){
+  const d=loadDrafts();
+  const approved=Object.values(d).filter(v=>v.state==='approved'||v.state==='drafted').length;
+  const badge=document.getElementById('queue-count');
+  if(!badge)return;
+  if(approved>0){badge.textContent=approved;badge.style.display='inline';}
+  else{badge.style.display='none';}
+}
+
+const PLATFORM_MAP={
+  signal:['X'],
+  capability:['X','LinkedIn'],
+  founder:['X','LinkedIn'],
+  longform:['X','Medium','LinkedIn']
+};
+const ALL_PLATFORMS=['X','LinkedIn','Medium','Telegram'];
+
+function renderQueueTab(){
+  const d=loadDrafts();
+  const pm=loadPosted();
+  const entries=Object.entries(d).filter(([sk])=>!pm[sk]);
+  const drafted=entries.filter(([,v])=>v.state==='drafted').sort((a,b)=>b[1].updatedAt-a[1].updatedAt);
+  const approved=entries.filter(([,v])=>v.state==='approved').sort((a,b)=>{
+    // Sort approved by scheduled datetime if set, else by updatedAt
+    const aTime=a[1].schedDate&&a[1].schedTime?new Date(a[1].schedDate+'T'+a[1].schedTime).getTime():a[1].updatedAt;
+    const bTime=b[1].schedDate&&b[1].schedTime?new Date(b[1].schedDate+'T'+b[1].schedTime).getTime():b[1].updatedAt;
+    return aTime-bTime;
+  });
+
+  function renderItem([sk,v]){
+    const defaultPlatforms=PLATFORM_MAP[v.type]||['X'];
+    const activePlatforms=v.platforms||defaultPlatforms;
+    const schedSummary=v.schedDate&&v.schedTime
+      ?`📅 ${v.schedDate} at ${v.schedTime}`
+      :v.schedDate?`📅 ${v.schedDate}`:'No schedule set';
+    const schedSet=!!(v.schedDate);
+
+    return`<div class="queue-item" id="qi-${sk}">
+      <div class="queue-meta">
+        <span class="queue-date">${v.date}</span>
+        <span class="pill ${PILL_MAP[v.type]||'pill-sig'}" style="margin:0">${LABEL_MAP[v.type]||v.type}</span>
+        <span class="perf-tag ${getTopicPerfTag(v.topic)}">${getTopicPerfLabel(v.topic)}</span>
+      </div>
+      <div class="queue-topic">${esc(v.topic||'No topic')}</div>
+
+      <textarea class="queue-edit-area" id="qe-${sk}"
+        placeholder="Content will appear here…"
+        oninput="saveQueueEdit('${sk}',this)"
+      >${esc(v.content||'')}</textarea>
+
+      <div class="platform-row">
+        <span class="platform-lbl">Post to:</span>
+        ${ALL_PLATFORMS.map(p=>`<button class="plat-chip${activePlatforms.includes(p)?' on':''}" onclick="togglePlatform('${sk}','${p}',this)">${p}</button>`).join('')}
+      </div>
+
+      <div class="queue-schedule">
+        <div class="queue-schedule-field">
+          <label>Date</label>
+          <input type="date" id="qd-${sk}" value="${v.schedDate||''}" onchange="saveSchedule('${sk}')">
+        </div>
+        <div class="queue-schedule-field">
+          <label>Time (local)</label>
+          <input type="time" id="qt-${sk}" value="${v.schedTime||''}" onchange="saveSchedule('${sk}')">
+        </div>
+      </div>
+      <div class="sched-summary${schedSet?' set':''}" id="qs-${sk}">${schedSummary}</div>
+      <div class="sched-rationale${v.schedRationale?' show':''}" id="sr-${sk}">${esc(v.schedRationale||'')}</div>
+
+      <div class="queue-actions" style="margin-top:10px">
+        <button class="cp" onclick="copyQueueItem('${sk}',this)">Copy</button>
+        <button class="suggest-btn" id="sb-${sk}" onclick="suggestSchedule('${sk}')">&#10024; Suggest time</button>
+        ${v.state==='drafted'?`<button class="state-btn approve" onclick="approveDraft('${sk}','${v.type}')">Approve</button>`:''}
+        <button class="state-btn" onclick="markPostedFromQueue('${sk}','${v.type}')">Mark posted</button>
+        <button class="state-btn" style="color:var(--m);border-color:var(--mbd)" onclick="removeDraft('${sk}')">Remove</button>
+        <span class="save-flash" id="sf-${sk}">Saved</span>
+      </div>
+    </div>`;
+  }
+
+  const dEl=document.getElementById('queue-drafted-list');
+  const aEl=document.getElementById('queue-approved-list');
+  if(dEl)dEl.innerHTML=drafted.length?drafted.map(renderItem).join(''):`<div style="font-size:13px;color:var(--tx3);padding:8px 0">No drafts waiting for review.</div>`;
+  if(aEl)aEl.innerHTML=approved.length?approved.map(renderItem).join(''):`<div style="font-size:13px;color:var(--tx3);padding:8px 0">No approved posts yet. Approve a draft to add it here.</div>`;
+  updateQueueCount();
+}
+
+function saveQueueEdit(sk,el){
+  const d=loadDrafts();
+  if(!d[sk])return;
+  d[sk].content=el.value;
+  d[sk].updatedAt=Date.now();
+  // Also update the clip so Copy still works
+  S.clips['s-'+sk]=el.value;
+  saveDrafts(d);
+  flashSave(sk);
+}
+
+function togglePlatform(sk,platform,btn){
+  const d=loadDrafts();
+  if(!d[sk])return;
+  const defaultP=PLATFORM_MAP[d[sk].type]||['X'];
+  if(!d[sk].platforms)d[sk].platforms=[...defaultP];
+  const idx=d[sk].platforms.indexOf(platform);
+  if(idx>=0)d[sk].platforms.splice(idx,1);
+  else d[sk].platforms.push(platform);
+  saveDrafts(d);
+  btn.classList.toggle('on');
+  flashSave(sk);
+}
+
+function saveSchedule(sk){
+  const d=loadDrafts();
+  if(!d[sk])return;
+  const dateEl=document.getElementById('qd-'+sk);
+  const timeEl=document.getElementById('qt-'+sk);
+  d[sk].schedDate=dateEl?dateEl.value:'';
+  d[sk].schedTime=timeEl?timeEl.value:'';
+  d[sk].updatedAt=Date.now();
+  saveDrafts(d);
+  const summary=document.getElementById('qs-'+sk);
+  if(summary){
+    const set=!!(d[sk].schedDate);
+    const txt=d[sk].schedDate&&d[sk].schedTime?`Scheduled: ${d[sk].schedDate} at ${d[sk].schedTime}`:d[sk].schedDate?`Scheduled: ${d[sk].schedDate}`:'No schedule set';
+    summary.textContent=txt;
+    summary.className='sched-summary'+(set?' set':'');
+  }
+  flashSave(sk);
+}
+
+function copyQueueItem(sk,btn){
+  const d=loadDrafts();
+  const content=(d[sk]&&d[sk].content)||S.clips['s-'+sk]||'';
+  navigator.clipboard.writeText(content).then(()=>{
+    btn.textContent='Copied!';btn.classList.add('ok');
+    setTimeout(()=>{btn.textContent='Copy';btn.classList.remove('ok');},1600);
+  });
+}
+
+function flashSave(sk){
+  const el=document.getElementById('sf-'+sk);
+  if(!el)return;
+  el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),1400);
+}
+
+function markPostedFromQueue(sk,type){
+  const d=loadDrafts();
+  const topic=d[sk]?d[sk].topic:'';
+  const date=new Date().toISOString().slice(0,10);
+  // Add to history
+  const h=loadHistory();
+  const perfTag=getStoredPerfTag(sk);
+  h.push({sk,type,topic,text:d[sk]?d[sk].content.slice(0,200):'',date,perf:perfTag});
+  saveHistory(h);
+  // Mark posted
+  const pm=loadPosted();
+  pm[sk]={topic,date,type};
+  savePostedMap(pm);
+  // Remove from drafts
+  delete d[sk];saveDrafts(d);
+  updateQueueCount();renderQueueTab();renderCal();
+}
+
+// ── PERFORMANCE FEEDBACK LOOP ────────────────────────────────────────────────
+function tagHistoryWithPerformance(){
+  if(!AX||!AX.rows)return;
+  const h=loadHistory();
+  if(!h.length)return;
+  const avgEng=AX.avgRate;
+  const highThreshold=avgEng*1.5;
+  const lowThreshold=avgEng*0.6;
+  let updated=false;
+  h.forEach(item=>{
+    if(item.perf)return; // already tagged
+    // Match by text similarity
+    const match=AX.rows.find(r=>r.text&&item.text&&(r.text.slice(0,60)===item.text.slice(0,60)||r.text.includes(item.topic)));
+    if(match){
+      item.perf=match.rate>=highThreshold?'high':match.rate<=lowThreshold?'low':'avg';
+      updated=true;
+    }
+  });
+  if(updated)saveHistory(h);
+}
+
+function getPerformanceInsights(){
+  const h=loadHistory().filter(p=>p.perf);
+  if(!h.length)return'';
+  const high=h.filter(p=>p.perf==='high');
+  const low=h.filter(p=>p.perf==='low');
+  const parts=[];
+  if(high.length)parts.push(`High performers (replicate these angles): ${high.map(p=>p.type+': "'+p.topic.slice(0,50)+'"').join('; ')}`);
+  if(low.length)parts.push(`Low performers (avoid these angles): ${low.map(p=>p.topic.slice(0,40)).join('; ')}`);
+  return parts.join('. ');
+}
+
+function getTopicPerfTag(topic){
+  const h=loadHistory();
+  const match=h.find(p=>p.topic===topic);
+  if(!match||!match.perf)return'perf-avg';
+  return match.perf==='high'?'perf-high':match.perf==='low'?'perf-low':'perf-avg';
+}
+
+function getTopicPerfLabel(topic){
+  const h=loadHistory();
+  const match=h.find(p=>p.topic===topic);
+  if(!match||!match.perf)return'—';
+  return match.perf==='high'?'↑ High performer':match.perf==='low'?'↓ Low performer':'Avg';
+}
+
+function getStoredPerfTag(sk){
+  const d=loadDrafts();
+  return d[sk]?d[sk].perf||null:null;
+}
+
+function historyContext(){
+  const h=loadHistory();
+  if(!h.length)return'';
+  const recent=h.slice(-15).reverse();
+  const highPerf=h.filter(p=>p.perf==='high').slice(-5);
+  const lowPerf=h.filter(p=>p.perf==='low').slice(-5);
+  let ctx=`RECENTLY PUBLISHED — do not repeat, rephrase, reframe, or revisit these topics or angles. Treat each as fully exhausted:\n${recent.map(p=>`- [${p.date}] ${p.type}: "${p.topic}"`).join('\n')}`;
+  if(highPerf.length)ctx+=`\n\nHIGH-PERFORMING PATTERNS (replicate the format and depth, but on entirely different topics):\n${highPerf.map(p=>`- ${p.type}: "${p.topic}"`).join('\n')}`;
+  if(lowPerf.length)ctx+=`\n\nLOW-PERFORMING PATTERNS (avoid these angles entirely):\n${lowPerf.map(p=>`- "${p.topic}"`).join('\n')}`;
+  return ctx;
+}
+
+function showTab(id,el){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('sec-'+id).classList.add('on');el.classList.add('on');
+  if(id==='history')renderHistoryTab();
+  if(id==='queue')renderQueueTab();
+  if(id==='chat')renderCtxPanel();
+  if(id==='calendar')renderInsightsBadge();
+  if(id==='analytics'){renderStrategyPanel();}
+}
+
+function getSlotDate(sk){
+  const parts=sk.split('-');
+  if(parts.length<4)return null;
+  const day=parts[parts.length-1];
+  const year=parseInt(parts[0]),month=parseInt(parts[1]),date=parseInt(parts[2]);
+  const d=new Date(year,month,date);
+  if(day==='tue')d.setDate(d.getDate()+1);
+  else if(day==='thu')d.setDate(d.getDate()+3);
+  else if(day==='sat')d.setDate(d.getDate()+5);
+  return d;
+}
+
+function getAnalyticsTimePatterns(){
+  if(!AX||!AX.rows)return'';
+  // Extract hour from top-performing posts
+  const topRows=AX.rows.slice(0,Math.min(20,AX.rows.length));
+  const hours=topRows.map(r=>{
+    if(!r.time)return null;
+    const d=new Date(r.time);
+    return isNaN(d)?null:d.getHours();
+  }).filter(h=>h!==null);
+  if(!hours.length)return'';
+  // Count frequency per hour
+  const freq={};
+  hours.forEach(h=>{freq[h]=(freq[h]||0)+1;});
+  const sorted=Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  return`Best-performing post hours from your analytics: ${sorted.map(([h])=>`${h}:00`).join(', ')} (local time)`;
+}
+
+async function suggestSchedule(sk){
+  const btn=document.getElementById('sb-'+sk);
+  if(btn){btn.disabled=true;btn.textContent='Thinking…';}
+
+  const d=loadDrafts();
+  const v=d[sk];
+  if(!v){if(btn){btn.disabled=false;btn.textContent='✨ Suggest time';}return;}
+
+  const slotDate=getSlotDate(sk);
+  const fixedDate=slotDate?slotDate.toISOString().slice(0,10):v.date;
+  const dayName=slotDate?['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][slotDate.getDay()]:'';
+  const timePatterns=getAnalyticsTimePatterns();
+  const existingSchedules=Object.entries(d)
+    .filter(([id,item])=>id!==sk&&item.schedDate===fixedDate&&item.schedTime)
+    .map(([,item])=>`${item.schedTime} (${item.type})`).join(', ');
+
+  const prompt='You are scheduling a 2MR Labs social media post. The post date is fixed: '+fixedDate+' ('+dayName+').\n\nPOST:\n- Type: '+(LABEL_MAP[v.type]||v.type)+'\n- Topic: '+(v.topic||'—')+'\n- Content: "'+(v.content||'').slice(0,150)+'"\n\nRecommend the optimal TIME and PLATFORMS only. Date is already set.\n\nAUDIENCE: Government stakeholders in MENA, Singapore, UAE, Saudi Arabia, Malaysia (UTC+4 to UTC+8).\n'+(timePatterns?'YOUR ANALYTICS: '+timePatterns+'\n':'')+(existingSchedules?'Already scheduled this day at: '+existingSchedules+' — avoid clustering.\n':'')+'\nPLATFORM RULES:\n- Signal posts (Tuesday): X only, 08:00 SGT\n- Capability / Founder (Thursday): X + LinkedIn, 08:00 SGT\n- Long-form (Saturday): X + Medium or X Article, optionally LinkedIn, 08:00 SGT\n- LinkedIn never on weekends\n- SGT = UTC+8\n\nReturn ONLY valid JSON:\n{"time":"HH:MM","platforms":["X"],"rationale":"One sentence on WHY this time suits this content type and audience."}';
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:200,messages:[{role:'user',content:prompt}]})
+    });
+    const res=await r.json();
+    const raw=(res.content?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const sug=JSON.parse(raw);
+
+    d[sk].schedDate=fixedDate;
+    d[sk].schedTime=sug.time||'';
+    d[sk].platforms=sug.platforms||PLATFORM_MAP[v.type]||['X'];
+    d[sk].schedRationale=sug.rationale||'';
+    d[sk].updatedAt=Date.now();
+    saveDrafts(d);
+
+    const dateEl=document.getElementById('qd-'+sk);
+    const timeEl=document.getElementById('qt-'+sk);
+    const summEl=document.getElementById('qs-'+sk);
+    const ratEl=document.getElementById('sr-'+sk);
+    if(dateEl)dateEl.value=fixedDate;
+    if(timeEl)timeEl.value=sug.time||'';
+    if(summEl){summEl.textContent=(sug.time?'📅 '+fixedDate+' at '+sug.time+' SGT':'📅 '+fixedDate);summEl.className='sched-summary set';}
+    if(ratEl){ratEl.textContent=sug.rationale||'';ratEl.className='sched-rationale show';}
+    const item=document.getElementById('qi-'+sk);
+    if(item)item.querySelectorAll('.plat-chip').forEach(chip=>chip.classList.toggle('on',(sug.platforms||[]).includes(chip.textContent.trim())));
+    flashSave(sk);
+  }catch(e){
+    const ratEl=document.getElementById('sr-'+sk);
+    if(ratEl){ratEl.textContent='Could not generate suggestion: '+e.message;ratEl.className='sched-rationale show';}
+  }
+  if(btn){btn.disabled=false;btn.textContent='✨ Suggest time';}
+}
+
+// ── CONTEXT PANEL ────────────────────────────────────────────────────────────
+function loadCtx(){try{return JSON.parse(localStorage.getItem('2mr_ctx')||'[]');}catch{return[];}}
+function saveCtx(cards){localStorage.setItem('2mr_ctx',JSON.stringify(cards));}
+
+function addCtxCard(){
+  const cards=loadCtx();
+  const id='ctx-'+Date.now();
+  cards.unshift({id,title:'',status:'public',notes:'',files:[],expanded:false});
+  saveCtx(cards);renderCtxPanel();
+  // Focus the title input of new card
+  setTimeout(()=>{const el=document.getElementById('ctitle-'+id);if(el){el.focus();}},50);
+}
+
+function ctxUpdateTitle(id,val){
+  const cards=loadCtx();const c=cards.find(c=>c.id===id);if(c){c.title=val;saveCtx(cards);}
+}
+function ctxUpdateNotes(id,val){
+  const cards=loadCtx();const c=cards.find(c=>c.id===id);if(c){c.notes=val;saveCtx(cards);}
+}
+function ctxSetStatus(id,val){
+  const cards=loadCtx();const c=cards.find(c=>c.id===id);if(!c)return;
+  c.status=val;
+  if(val==='archived'){c.expanded=false;}
+  saveCtx(cards);
+  // Update select class without full re-render
+  const sel=document.getElementById('cstatus-'+id);
+  if(sel){sel.className='ctx-status-select '+val;}
+  // If archived, trigger full re-render to move card
+  if(val==='archived')renderCtxPanel();
+}
+
+function ctxArchive(id){
+  const cards=loadCtx();const c=cards.find(c=>c.id===id);if(c){c.status='archived';c.expanded=false;}
+  saveCtx(cards);renderCtxPanel();
+}
+function ctxRestore(id){
+  const cards=loadCtx();const c=cards.find(c=>c.id===id);if(c){c.status='public';}
+  saveCtx(cards);renderCtxPanel();
+}
+function ctxDelete(id){
+  if(!confirm('Permanently delete this context item?'))return;
+  saveCtx(loadCtx().filter(c=>c.id!==id));renderCtxPanel();
+}
+function ctxToggleExpand(id){
+  const cards=loadCtx();const c=cards.find(c=>c.id===id);if(c){c.expanded=!c.expanded;}
+  saveCtx(cards);renderCtxPanel();
+}
+function toggleArchiveList(){
+  const list=document.getElementById('ctx-archive-list');
+  const arrow=document.getElementById('ctx-archive-arrow');
+  if(!list)return;
+  const open=list.classList.toggle('open');
+  if(arrow)arrow.textContent=open?'▲':'▼';
+}
+
+async function ctxHandleFile(id,input){
+  const file=input.files[0];if(!file)return;
+  input.value='';
+  const MAX=3000; // ~500 words
+  let excerpt='';let name=file.name;
+
+  try{
+    if(file.type==='application/pdf'||name.endsWith('.pdf')){
+      excerpt=await extractPDF(file,MAX);
+    } else if(name.endsWith('.docx')){
+      excerpt=await extractDOCX(file,MAX);
+    } else if(file.type.startsWith('image/')){
+      // Store image as base64 for AI vision
+      excerpt=await new Promise(res=>{
+        const r=new FileReader();r.onload=e=>res('[IMAGE:'+e.target.result+']');r.readAsDataURL(file);
+      });
+    } else {
+      excerpt=await new Promise(res=>{
+        const r=new FileReader();r.onload=e=>res((e.target.result||'').slice(0,MAX));r.readAsText(file);
+      });
+    }
+  }catch(e){excerpt='[Could not extract: '+e.message+']';}
+
+  const cards=loadCtx();const c=cards.find(c=>c.id===id);
+  if(c){c.files.push({name,excerpt:excerpt.slice(0,MAX)});saveCtx(cards);}
+  renderCtxPanel();
+}
+
+async function extractPDF(file,max){
+  // Load PDF.js dynamically
+  if(!window.pdfjsLib){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+      s.onload=res;s.onerror=rej;document.head.appendChild(s);
+    });
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+  const ab=await file.arrayBuffer();
+  const pdf=await window.pdfjsLib.getDocument({data:ab}).promise;
+  let text='';
+  for(let i=1;i<=Math.min(pdf.numPages,10);i++){
+    const page=await pdf.getPage(i);
+    const tc=await page.getTextContent();
+    text+=tc.items.map(it=>it.str).join(' ')+'\n';
+    if(text.length>max)break;
+  }
+  return text.slice(0,max);
+}
+
+async function extractDOCX(file,max){
+  if(!window.mammoth){
+    await new Promise((res,rej)=>{
+      const s=document.createElement('script');
+      s.src='https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js';
+      s.onload=res;s.onerror=rej;document.head.appendChild(s);
+    });
+  }
+  const ab=await file.arrayBuffer();
+  const result=await window.mammoth.extractRawText({arrayBuffer:ab});
+  return(result.value||'').slice(0,max);
+}
+
+function ctxRemoveFile(id,idx){
+  const cards=loadCtx();const c=cards.find(c=>c.id===id);
+  if(c){c.files.splice(idx,1);saveCtx(cards);}renderCtxPanel();
+}
+
+async function saveAndApplyCtx(){
+  const btn=document.getElementById('ctx-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='Applying…';}
+
+  // Regenerate chat chips based on active context
+  await refreshChatChips();
+
+  // Clear plan cache so next "Plan 4 weeks" uses fresh context
+  localStorage.removeItem(planCacheKey());
+  setPlanStatus('Context updated — hit "Plan 4 weeks" to regenerate topics with new context');
+
+  if(btn){
+    btn.textContent='Applied ✓';btn.classList.add('saved');
+    setTimeout(()=>{btn.textContent='Save & apply';btn.classList.remove('saved');btn.disabled=false;},2000);
+  }
+}
+
+async function refreshChatChips(){
+  const cards=loadCtx().filter(c=>c.status!=='archived');
+  const box=document.getElementById('chat-chips-box');
+  if(!box)return;
+
+  if(!cards.length||!getKey()){
+    // Default chips
+    box.innerHTML=defaultChips();return;
+  }
+
+  // Ask Claude to generate relevant chip prompts based on active context
+  const ctxSummary=cards.map(c=>`[${c.status.toUpperCase()}] ${c.title}${c.notes?' — '+c.notes.slice(0,60):''}${c.notes&&c.notes.length>60?'…':''}`).join('\n');
+  const prompt='Based on these active context items for 2MR Labs, generate 5 short chat prompt suggestions (max 8 words each) that a content creator would want to ask. Mix content generation requests with strategy questions. Context:\n'+ctxSummary+'\n\nReturn ONLY a JSON array of 5 strings. No markdown.';
+
+  try{
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':getKey(),'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:200,messages:[{role:'user',content:prompt}]})
+    });
+    const d=await r.json();
+    const raw=(d.content?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    const chips=JSON.parse(raw);
+    box.innerHTML=chips.map(c=>`<button class="cchip" onclick="setChip(this)">${esc(c)}</button>`).join('');
+  }catch(e){
+    box.innerHTML=defaultChips();
+  }
+}
+
+function defaultChips(){
+  return`<button class="cchip" onclick="setChip(this)">Signal post on a recent infrastructure attack</button>
+    <button class="cchip" onclick="setChip(this)">Giants OS sensor fusion capability post</button>
+    <button class="cchip" onclick="setChip(this)">Founder statement from Lien — why he joined 2MR</button>
+    <button class="cchip" onclick="setChip(this)">Five signal post ideas for this week</button>
+    <button class="cchip" onclick="setChip(this)">What should we post about this week?</button>`;
+}
+
+function renderCtxPanel(){
+  const cards=loadCtx();
+  const active=cards.filter(c=>c.status!=='archived');
+  const archived=cards.filter(c=>c.status==='archived');
+  const el=document.getElementById('ctx-active-list');
+  const archSec=document.getElementById('ctx-archive-section');
+  const archList=document.getElementById('ctx-archive-list');
+  if(!el)return;
+
+  if(!active.length){
+    el.innerHTML=`<div class="ctx-empty">No context yet.<br>Hit + Add to track what's happening at 2MR Labs.</div>`;
+  } else {
+    el.innerHTML=active.map(c=>{
+      return`<div class="ctx-card">
+        <div class="ctx-card-hd">
+          <input class="ctx-title-input" id="ctitle-${c.id}" value="${esc(c.title)}" placeholder="Context item title…"
+            onchange="ctxUpdateTitle('${c.id}',this.value)" oninput="ctxUpdateTitle('${c.id}',this.value)">
+          <select class="ctx-status-select ${c.status}" id="cstatus-${c.id}"
+            onchange="ctxSetStatus('${c.id}',this.value)">
+            <option value="public"${c.status==='public'?' selected':''}>Public</option>
+            <option value="private"${c.status==='private'?' selected':''}>Private</option>
+            <option value="archived"${c.status==='archived'?' selected':''}>Archive</option>
+          </select>
+          <button class="ctx-expand-btn${c.expanded?' open':''}" onclick="ctxToggleExpand('${c.id}')">▼</button>
+          <button class="ctx-archive-btn" onclick="ctxArchive('${c.id}')" title="Archive">✕</button>
+        </div>
+        <div class="ctx-body${c.expanded?' open':''}">
+          <textarea class="ctx-notes" placeholder="Notes — what's happening, key details, context for the AI…"
+            onchange="ctxUpdateNotes('${c.id}',this.value)"
+            oninput="ctxUpdateNotes('${c.id}',this.value)">${esc(c.notes)}</textarea>
+          <div class="ctx-files">
+            ${c.files.map((f,i)=>`<div class="ctx-file-item">
+              <span class="ctx-file-name" title="${esc(f.name)}">${esc(f.name)}</span>
+              <button class="ctx-file-del" onclick="ctxRemoveFile('${c.id}',${i})">✕</button>
+            </div>`).join('')}
+          </div>
+          <div class="ctx-upload-row">
+            <label class="ctx-upload-btn" style="cursor:pointer">
+              + Attach file
+              <input type="file" accept=".pdf,.docx,.txt,.md,.png,.jpg,.jpeg" style="display:none"
+                onchange="ctxHandleFile('${c.id}',this)">
+            </label>
+            <span style="font-size:10px;color:var(--tx3);align-self:center">PDF, DOCX, TXT, images</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Archive section
+  if(archSec){archSec.style.display=archived.length?'block':'none';}
+  if(archList){
+    archList.innerHTML=archived.map(c=>`<div class="ctx-archive-item">
+      <span class="ctx-archive-title" title="${esc(c.title)}">${esc(c.title)||'(untitled)'}</span>
+      <button class="ctx-restore-btn" onclick="ctxRestore('${c.id}')">Restore</button>
+      <button class="ctx-del-btn" onclick="ctxDelete('${c.id}')">Delete</button>
+    </div>`).join('');
+  }
+}
+
+function buildContextBlock(){
+  const cards=loadCtx().filter(c=>c.status!=='archived');
+  if(!cards.length)return'';
+  const pub=cards.filter(c=>c.status==='public');
+  const priv=cards.filter(c=>c.status==='private');
+  let block='\n\n── CURRENT COMPANY CONTEXT ──────────────────────────────\n';
+
+  if(pub.length){
+    block+='\nPUBLIC — reference freely in all content:\n';
+    pub.forEach(c=>{
+      block+='\n['+( c.title||'Untitled')+']\n';
+      if(c.notes.trim())block+=c.notes.trim()+'\n';
+      c.files.forEach(f=>{
+        if(f.excerpt&&!f.excerpt.startsWith('[IMAGE:'))
+          block+='Attached file ('+f.name+'): '+f.excerpt+'\n';
+      });
+    });
+  }
+
+  if(priv.length){
+    block+='\nPRIVATE — you have this context but MUST NOT reveal specifics. Write like Palantir or Anduril: acknowledge existence and strategic significance, tease capability, never name specific partners, terms, timelines, counterparties, or operational details. Reference obliquely: "a recently signed government mandate", "an active deployment in the region", "a new strategic partnership":\n';
+    priv.forEach(c=>{
+      block+='\n['+( c.title||'Untitled')+']\n';
+      if(c.notes.trim())block+=c.notes.trim()+'\n';
+      c.files.forEach(f=>{
+        if(f.excerpt&&!f.excerpt.startsWith('[IMAGE:'))
+          block+='Attached file ('+f.name+'): '+f.excerpt+'\n';
+      });
+    });
+  }
+
+  block+='─────────────────────────────────────────────────────────\n';
+  return block;
+}
+
+checkKey();
+renderCal();
+renderCtxPanel();
+updateQueueCount();
+renderInsightsBadge();
+if(typeof AX!=='undefined'&&AX)tagHistoryWithPerformance();
+setTimeout(()=>{
+  const hasTopics=Object.keys(S.topics).length>0;
+  if(!hasTopics&&getKey()){generatePlan();}
+  else if(!hasTopics){setPlanStatus('Add your API key then hit "Plan 4 weeks" to generate topics');}
+},300);
+</script>
+</body>
+</html>
